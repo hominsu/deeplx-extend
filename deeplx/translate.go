@@ -1,7 +1,6 @@
 package deeplx
 
 import (
-	"encoding/json"
 	"io"
 	"log"
 	"net/http"
@@ -11,9 +10,12 @@ import (
 	"github.com/andybalholm/brotli"
 	"github.com/tidwall/gjson"
 	"github.com/valyala/fasthttp"
+	"google.golang.org/protobuf/encoding/protojson"
+
+	v1 "github.com/oio-network/deeplx-extend/api/deeplx/v1"
 )
 
-func initPayload(sourceLang, targetLang string) *PostData {
+func initPayload(sourceLang, targetLang string) *v1.PostData {
 	hasRegionalVariant := false
 	targetLangParts := strings.Split(targetLang, "-")
 
@@ -24,20 +26,20 @@ func initPayload(sourceLang, targetLang string) *PostData {
 		hasRegionalVariant = true
 	}
 
-	commonJobParams := CommonJobParams{
+	commonJobParams := &v1.CommonJobParams{
 		WasSpoken:    false,
-		TranscribeAS: "",
+		TranscribeAs: "",
 	}
 	if hasRegionalVariant {
 		commonJobParams.RegionalVariant = targetLang
 	}
 
-	return &PostData{
+	return &v1.PostData{
 		Jsonrpc: "2.0",
 		Method:  "LMT_handle_texts",
-		Params: Params{
+		Params: &v1.Params{
 			Splitting: "newlines",
-			Lang: Lang{
+			Lang: &v1.Lang{
 				SourceLangUserSelected: sourceLang,
 				TargetLang:             targetLangCode,
 			},
@@ -50,13 +52,13 @@ func translateByOfficialAPI(text string, sourceLang string, targetLang string, a
 	freeURL := "https://api-free.deepl.com/v2/translate"
 	textArray := strings.Split(text, "\n")
 
-	payload := PayloadAPI{
+	payload := &v1.PayloadAPI{
 		Text:       textArray,
 		TargetLang: targetLang,
 		SourceLang: sourceLang,
 	}
 
-	payloadBytes, err := json.Marshal(payload)
+	payloadBytes, err := protojson.Marshal(payload)
 	if err != nil {
 		return "", err
 	}
@@ -80,8 +82,8 @@ func translateByOfficialAPI(text string, sourceLang string, targetLang string, a
 	}
 
 	// Parsing the response
-	var translationResponse TranslationResponse
-	err = json.Unmarshal(resp.Body(), &translationResponse)
+	var translationResponse v1.TranslationResponse
+	err = protojson.Unmarshal(resp.Body(), &translationResponse)
 	if err != nil {
 		return "", err
 	}
@@ -95,7 +97,7 @@ func translateByOfficialAPI(text string, sourceLang string, targetLang string, a
 	return sb.String(), nil
 }
 
-func translateByDeepLX(sourceLang, targetLang, translateText, authKey string, client *fasthttp.Client) (TranslationResult, error) {
+func translateByDeepLX(sourceLang, targetLang, translateText, authKey string, client *fasthttp.Client) (*v1.TranslationResult, error) {
 	id := getRandomNumber()
 	if sourceLang == "" {
 		lang := whatlanggo.DetectLang(translateText)
@@ -107,7 +109,7 @@ func translateByDeepLX(sourceLang, targetLang, translateText, authKey string, cl
 	}
 
 	if translateText == "" {
-		return TranslationResult{
+		return &v1.TranslationResult{
 			Code:    http.StatusNotFound,
 			Message: "No translateText to translate",
 		}, nil
@@ -116,15 +118,15 @@ func translateByDeepLX(sourceLang, targetLang, translateText, authKey string, cl
 	www2 := "https://www2.deepl.com/jsonrpc"
 	id = id + 1
 	payload := initPayload(sourceLang, targetLang)
-	text := Text{
+	text := &v1.Text{
 		Text:                translateText,
 		RequestAlternatives: 3,
 	}
-	payload.ID = id
+	payload.Id = id
 	payload.Params.Texts = append(payload.Params.Texts, text)
 	payload.Params.Timestamp = getTimeStamp(getICount(translateText))
 
-	reqBody, _ := json.Marshal(payload)
+	reqBody, _ := protojson.Marshal(payload)
 	bodyStr := string(reqBody)
 
 	// Adding spaces to the JSON string based on the ID to adhere to DeepL's request formatting rules
@@ -162,7 +164,7 @@ func translateByDeepLX(sourceLang, targetLang, translateText, authKey string, cl
 
 	err := client.Do(req, resp)
 	if err != nil {
-		return TranslationResult{
+		return &v1.TranslationResult{
 			Code:    http.StatusServiceUnavailable,
 			Message: "DeepL API request failed",
 		}, nil
@@ -185,7 +187,7 @@ func translateByDeepLX(sourceLang, targetLang, translateText, authKey string, cl
 	// Handling various response statuses and potential errors
 	if res.Get("error.code").String() == "-32600" {
 		log.Println(res.Get("error").String())
-		return TranslationResult{
+		return &v1.TranslationResult{
 			Code:    http.StatusNotAcceptable,
 			Message: "Invalid target language",
 		}, nil
@@ -201,15 +203,15 @@ func translateByDeepLX(sourceLang, targetLang, translateText, authKey string, cl
 				if validity {
 					translatedText, err := translateByOfficialAPI(translateText, sourceLang, targetLang, authKey, client)
 					if err != nil {
-						return TranslationResult{
+						return &v1.TranslationResult{
 							Code:    http.StatusTooManyRequests,
 							Message: "Too Many Requests",
 						}, nil
 					}
-					return TranslationResult{
+					return &v1.TranslationResult{
 						Code:       http.StatusOK,
 						Message:    "Success",
-						ID:         1000000,
+						Id:         1000000,
 						Data:       translatedText,
 						SourceLang: sourceLang,
 						TargetLang: targetLang,
@@ -226,14 +228,14 @@ func translateByDeepLX(sourceLang, targetLang, translateText, authKey string, cl
 			return true
 		})
 		if res.Get("result.texts.0.text").String() == "" {
-			return TranslationResult{
+			return &v1.TranslationResult{
 				Code:    http.StatusServiceUnavailable,
 				Message: "Translation failed, API returns an empty result.",
 			}, nil
 		} else {
-			return TranslationResult{
+			return &v1.TranslationResult{
 				Code:         http.StatusOK,
-				ID:           id,
+				Id:           id,
 				Message:      "Success",
 				Data:         res.Get("result.texts.0.text").String(),
 				Alternatives: alternatives,
@@ -244,9 +246,9 @@ func translateByDeepLX(sourceLang, targetLang, translateText, authKey string, cl
 		}
 	}
 
-	return TranslationResult{
+	return &v1.TranslationResult{
 		Code:    http.StatusServiceUnavailable,
-		Message: "Uknown error",
+		Message: "Unknown error",
 	}, nil
 }
 
@@ -269,8 +271,8 @@ func checkUsageAuthKey(authKey string, client *fasthttp.Client) (bool, error) {
 		return false, err
 	}
 
-	var response DeepLUsageResponse
-	err = json.Unmarshal(resp.Body(), &response)
+	var response v1.DeepLUsageResponse
+	err = protojson.Unmarshal(resp.Body(), &response)
 	if err != nil {
 		return false, err
 	}

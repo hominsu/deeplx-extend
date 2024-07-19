@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package deeplx.v1;
+
+import "deeplx/v1/types.proto";
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+
+option go_package = "github.com/oio-network/deeplx-extend/api/deeplx/v1;v1";
+option java_multiple_files = true;
+
+service DeepLXService {
+  rpc Translate(TranslateRequest) returns (TranslationResult) {
+    option (google.api.http) = {
+      post: "/translate"
+      body: "*"
+    };
+
+    option (gnostic.openapi.v3.operation) = {description: "translate"};
+  }
+}
+
+message TranslateRequest {
+  string text = 1;
+  string source_lang = 2;
+  string target_lang = 3;
+}

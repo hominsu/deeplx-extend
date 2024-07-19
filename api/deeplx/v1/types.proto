@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package deeplx.v1;
+
+option go_package = "github.com/oio-network/deeplx-extend/api/deeplx/v1;v1";
+option java_multiple_files = true;
+
+message Text {
+  string text = 1;
+  int32 request_alternatives = 2 [json_name = "requestAlternatives"];
+}
+
+message Lang {
+  string source_lang_user_selected = 1;
+  string target_lang = 2;
+}
+
+message CommonJobParams {
+  bool was_spoken = 1 [json_name = "wasSpoken"];
+  string transcribe_as = 2;
+  string regional_variant = 3 [json_name = "regionalVariant"];
+}
+
+message Params {
+  repeated Text texts = 1;
+  string splitting = 2;
+  Lang lang = 3;
+  int64 timestamp = 4;
+  CommonJobParams common_job_params = 5 [json_name = "CommonJobParams"];
+}
+
+message PostData {
+  string jsonrpc = 1;
+  string method = 2;
+  int64 id = 3;
+  Params params = 4;
+}
+
+message TranslationResult {
+  int32 code = 1;
+  string message = 2;
+  int64 id = 3;
+  string data = 4;
+  repeated string alternatives = 5;
+  string source_lang = 6;
+  string target_lang = 7;
+  string method = 8;
+}
+
+message PayloadAPI {
+  repeated string text = 1;
+  string target_lang = 2;
+  string source_lang = 3;
+}
+
+message Translation {
+  string text = 1;
+}
+
+message TranslationResponse {
+  repeated Translation translations = 1;
+}
+
+message DeepLUsageResponse {
+  int32 character_count = 1;
+  int32 character_limit = 2;
+}
