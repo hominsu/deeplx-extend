@@ -1,21 +1,29 @@
 package deeplx
 
 import (
-	"io"
-	"log"
+	"encoding/json"
 	"net/http"
 	"strings"
 
 	"github.com/abadojack/whatlanggo"
-	"github.com/andybalholm/brotli"
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/tidwall/gjson"
 	"github.com/valyala/fasthttp"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	v1 "github.com/oio-network/deeplx-extend/api/deeplx/v1"
 )
 
-func initPayload(sourceLang, targetLang string) *v1.PostData {
+type TranslateService struct {
+	log *log.Helper
+}
+
+func NewTranslateService(logger log.Logger) *TranslateService {
+	return &TranslateService{
+		log: log.NewHelper(log.With(logger, "module", "deeplx/deeplx")),
+	}
+}
+
+func (s *TranslateService) initPayload(sourceLang, targetLang string) *v1.PostData {
 	hasRegionalVariant := false
 	targetLangParts := strings.Split(targetLang, "-")
 
@@ -48,7 +56,7 @@ func initPayload(sourceLang, targetLang string) *v1.PostData {
 	}
 }
 
-func translateByOfficialAPI(text string, sourceLang string, targetLang string, authKey string, client *fasthttp.Client) (string, error) {
+func (s *TranslateService) translateByOfficialAPI(text string, sourceLang string, targetLang string, authKey string, client *fasthttp.Client) (string, error) {
 	freeURL := "https://api-free.deepl.com/v2/translate"
 	textArray := strings.Split(text, "\n")
 
@@ -58,7 +66,7 @@ func translateByOfficialAPI(text string, sourceLang string, targetLang string, a
 		SourceLang: sourceLang,
 	}
 
-	payloadBytes, err := protojson.Marshal(payload)
+	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
 		return "", err
 	}
@@ -83,7 +91,7 @@ func translateByOfficialAPI(text string, sourceLang string, targetLang string, a
 
 	// Parsing the response
 	var translationResponse v1.TranslationResponse
-	err = protojson.Unmarshal(resp.Body(), &translationResponse)
+	err = json.Unmarshal(resp.Body(), &translationResponse)
 	if err != nil {
 		return "", err
 	}
@@ -97,7 +105,7 @@ func translateByOfficialAPI(text string, sourceLang string, targetLang string, a
 	return sb.String(), nil
 }
 
-func translateByDeepLX(sourceLang, targetLang, translateText, authKey string, client *fasthttp.Client) (*v1.TranslationResult, error) {
+func (s *TranslateService) translateByDeepLX(sourceLang, targetLang, translateText, authKey string, client *fasthttp.Client) (*v1.TranslationResult, error) {
 	id := getRandomNumber()
 	if sourceLang == "" {
 		lang := whatlanggo.DetectLang(translateText)
@@ -117,7 +125,7 @@ func translateByDeepLX(sourceLang, targetLang, translateText, authKey string, cl
 
 	www2 := "https://www2.deepl.com/jsonrpc"
 	id = id + 1
-	payload := initPayload(sourceLang, targetLang)
+	payload := s.initPayload(sourceLang, targetLang)
 	text := &v1.Text{
 		Text:                translateText,
 		RequestAlternatives: 3,
@@ -126,7 +134,7 @@ func translateByDeepLX(sourceLang, targetLang, translateText, authKey string, cl
 	payload.Params.Texts = append(payload.Params.Texts, text)
 	payload.Params.Timestamp = getTimeStamp(getICount(translateText))
 
-	reqBody, _ := protojson.Marshal(payload)
+	reqBody, _ := json.Marshal(payload)
 	bodyStr := string(reqBody)
 
 	// Adding spaces to the JSON string based on the ID to adhere to DeepL's request formatting rules
@@ -171,22 +179,26 @@ func translateByDeepLX(sourceLang, targetLang, translateText, authKey string, cl
 	}
 
 	// Handling potential Brotli compressed response body
-	var bodyReader io.Reader
+	var body []byte
 	switch string(resp.Header.Peek("Content-Encoding")) {
 	case "br":
-		bodyReader = brotli.NewReader(resp.BodyStream())
+		body, err = resp.BodyUnbrotli()
+		if err != nil {
+			return &v1.TranslationResult{
+				Code:    http.StatusInternalServerError,
+				Message: "Failed to un-brotlied body",
+			}, nil
+		}
 	default:
-		bodyReader = resp.BodyStream()
+		body = resp.Body()
 	}
 
 	// Reading the response body and parsing it with gjson
-	body, _ := io.ReadAll(bodyReader)
-	// body, _ := io.ReadAll(resp.Body)
 	res := gjson.ParseBytes(body)
 
 	// Handling various response statuses and potential errors
 	if res.Get("error.code").String() == "-32600" {
-		log.Println(res.Get("error").String())
+		s.log.Error(res.Get("error").String())
 		return &v1.TranslationResult{
 			Code:    http.StatusNotAcceptable,
 			Message: "Invalid target language",
@@ -201,7 +213,7 @@ func translateByDeepLX(sourceLang, targetLang, translateText, authKey string, cl
 				continue
 			} else {
 				if validity {
-					translatedText, err := translateByOfficialAPI(translateText, sourceLang, targetLang, authKey, client)
+					translatedText, err := s.translateByOfficialAPI(translateText, sourceLang, targetLang, authKey, client)
 					if err != nil {
 						return &v1.TranslationResult{
 							Code:    http.StatusTooManyRequests,
@@ -210,7 +222,6 @@ func translateByDeepLX(sourceLang, targetLang, translateText, authKey string, cl
 					}
 					return &v1.TranslationResult{
 						Code:       http.StatusOK,
-						Message:    "Success",
 						Id:         1000000,
 						Data:       translatedText,
 						SourceLang: sourceLang,
@@ -236,7 +247,6 @@ func translateByDeepLX(sourceLang, targetLang, translateText, authKey string, cl
 			return &v1.TranslationResult{
 				Code:         http.StatusOK,
 				Id:           id,
-				Message:      "Success",
 				Data:         res.Get("result.texts.0.text").String(),
 				Alternatives: alternatives,
 				SourceLang:   sourceLang,
@@ -272,7 +282,7 @@ func checkUsageAuthKey(authKey string, client *fasthttp.Client) (bool, error) {
 	}
 
 	var response v1.DeepLUsageResponse
-	err = protojson.Unmarshal(resp.Body(), &response)
+	err = json.Unmarshal(resp.Body(), &response)
 	if err != nil {
 		return false, err
 	}
