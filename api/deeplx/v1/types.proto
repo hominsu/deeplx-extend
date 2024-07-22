@@ -7,7 +7,7 @@ option java_multiple_files = true;
 
 message Text {
   string text = 1;
-  int32 request_alternatives = 2 [json_name = "requestAlternatives"];
+  int32 requestAlternatives = 2;
 }
 
 message Lang {
@@ -16,9 +16,9 @@ message Lang {
 }
 
 message CommonJobParams {
-  bool was_spoken = 1 [json_name = "wasSpoken"];
+  bool wasSpoken = 1;
   string transcribe_as = 2;
-  string regional_variant = 3 [json_name = "regionalVariant"];
+  string regionalVariant = 3;
 }
 
 message Params {
@@ -26,7 +26,7 @@ message Params {
   string splitting = 2;
   Lang lang = 3;
   int64 timestamp = 4;
-  CommonJobParams common_job_params = 5 [json_name = "CommonJobParams"];
+  CommonJobParams CommonJobParams = 5;
 }
 
 message PostData {
@@ -42,8 +42,8 @@ message TranslationResult {
   int64 id = 3;
   string data = 4;
   repeated string alternatives = 5;
-  string source_lang = 6;
-  string target_lang = 7;
+  string source_lang = 6 [json_name = "source_lang"];;
+  string target_lang = 7 [json_name = "target_lang"];;
   string method = 8;
 }
 
