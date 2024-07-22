@@ -7,6 +7,7 @@ replace github.com/oio-network/deeplx-extend => ../../
 require (
 	github.com/go-kratos/kratos/v2 v2.7.3
 	github.com/google/wire v0.6.0
+	github.com/gorilla/handlers v1.5.2
 	github.com/oio-network/deeplx-extend v0.0.0-20240722063423-39faf6382c1b
 	github.com/oio-network/deeplx-extend/deeplx v0.0.0-20240722063423-39faf6382c1b
 	github.com/valyala/fasthttp v1.55.0
@@ -16,12 +17,15 @@ require (
 require (
 	github.com/abadojack/whatlanggo v1.0.1 // indirect
 	github.com/andybalholm/brotli v1.1.0 // indirect
+	github.com/felixge/httpsnoop v1.0.4 // indirect
+	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-kratos/aegis v0.2.0 // indirect
 	github.com/go-playground/form/v4 v4.2.1 // indirect
 	github.com/google/gnostic v0.7.0 // indirect
 	github.com/google/gnostic-models v0.6.9-0.20230804172637-c7be7c783f49 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
+	github.com/imdario/mergo v0.3.16 // indirect
 	github.com/klauspost/compress v1.17.9 // indirect
 	github.com/tidwall/gjson v1.17.1 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
