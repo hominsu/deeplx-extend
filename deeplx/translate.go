@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/abadojack/whatlanggo"
 	"github.com/go-kratos/kratos/v2/log"
@@ -56,7 +57,7 @@ func (s *TranslateService) initPayload(sourceLang, targetLang string) *v1.PostDa
 	}
 }
 
-func (s *TranslateService) translateByOfficialAPI(text string, sourceLang string, targetLang string, authKey string, client *fasthttp.Client) (string, error) {
+func (s *TranslateService) TranslateByOfficialAPI(text string, sourceLang string, targetLang string, authKey string, client *fasthttp.Client, deadline time.Time) (string, error) {
 	freeURL := "https://api-free.deepl.com/v2/translate"
 	textArray := strings.Split(text, "\n")
 
@@ -84,7 +85,7 @@ func (s *TranslateService) translateByOfficialAPI(text string, sourceLang string
 	req.Header.Set("Authorization", "DeepL-Auth-Key "+authKey)
 	req.Header.Set("Content-Type", "application/json")
 
-	err = client.Do(req, resp)
+	err = client.DoDeadline(req, resp, deadline)
 	if err != nil {
 		return "", err
 	}
@@ -105,7 +106,7 @@ func (s *TranslateService) translateByOfficialAPI(text string, sourceLang string
 	return sb.String(), nil
 }
 
-func (s *TranslateService) translateByDeepLX(sourceLang, targetLang, translateText, authKey string, client *fasthttp.Client) (*v1.TranslationResult, error) {
+func (s *TranslateService) TranslateByDeepLX(sourceLang, targetLang, translateText, authKey string, client *fasthttp.Client, deadline time.Time) (*v1.TranslationResult, error) {
 	id := getRandomNumber()
 	if sourceLang == "" {
 		lang := whatlanggo.DetectLang(translateText)
@@ -170,7 +171,7 @@ func (s *TranslateService) translateByDeepLX(sourceLang, targetLang, translateTe
 	req.Header.Set("x-app-version", "2.9.1")
 	req.Header.Set("Connection", "keep-alive")
 
-	err := client.Do(req, resp)
+	err := client.DoDeadline(req, resp, deadline)
 	if err != nil {
 		return &v1.TranslationResult{
 			Code:    http.StatusServiceUnavailable,
@@ -213,7 +214,7 @@ func (s *TranslateService) translateByDeepLX(sourceLang, targetLang, translateTe
 				continue
 			} else {
 				if validity {
-					translatedText, err := s.translateByOfficialAPI(translateText, sourceLang, targetLang, authKey, client)
+					translatedText, err := s.TranslateByOfficialAPI(translateText, sourceLang, targetLang, authKey, client, deadline)
 					if err != nil {
 						return &v1.TranslationResult{
 							Code:    http.StatusTooManyRequests,
