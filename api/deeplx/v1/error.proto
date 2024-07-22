@@ -7,11 +7,12 @@ import "errors/errors.proto";
 option go_package = "github.com/oio-network/deeplx-extend/api/deeplx/v1;v1";
 option java_multiple_files = true;
 
-enum PallasErrorReason {
+enum DeepLXErrorReason {
   option (errors.default_code) = 500;
 
   UNKNOWN = 0;
   INTERNAL = 1;
   NOT_FOUND = 2 [(errors.code) = 404];
-  CONFLICT = 3 [(errors.code) = 409];
+  UNAUTHENTICATED = 3 [(errors.code) = 401];
+  PERMISSION_DENIED = 4 [(errors.code) = 403];
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/google/wire"
 
 	v1 "github.com/oio-network/deeplx-extend/api/deeplx/v1"
+	"github.com/oio-network/deeplx-extend/app/deeplx/internal/conf"
 	"github.com/oio-network/deeplx-extend/app/deeplx/pkgs/client_pool"
 	"github.com/oio-network/deeplx-extend/deeplx"
 )
@@ -20,13 +21,15 @@ type DeepLXService struct {
 	v1.UnimplementedDeepLXServiceServer
 
 	ts   *deeplx.TranslateService
+	cs   *conf.Secret
 	pool *client_pool.ClientPool
 	log  *log.Helper
 }
 
-func NewDeepLXService(ts *deeplx.TranslateService, pool *client_pool.ClientPool, logger log.Logger) *DeepLXService {
+func NewDeepLXService(ts *deeplx.TranslateService, cs *conf.Secret, pool *client_pool.ClientPool, logger log.Logger) *DeepLXService {
 	return &DeepLXService{
 		ts:   ts,
+		cs:   cs,
 		pool: pool,
 		log:  log.NewHelper(log.With(logger, "module", "service/deeplx")),
 	}

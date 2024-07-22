@@ -16,11 +16,11 @@ func IsUnknown(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == PallasErrorReason_UNKNOWN.String() && e.Code == 500
+	return e.Reason == DeepLXErrorReason_UNKNOWN.String() && e.Code == 500
 }
 
 func ErrorUnknown(format string, args ...interface{}) *errors.Error {
-	return errors.New(500, PallasErrorReason_UNKNOWN.String(), fmt.Sprintf(format, args...))
+	return errors.New(500, DeepLXErrorReason_UNKNOWN.String(), fmt.Sprintf(format, args...))
 }
 
 func IsInternal(err error) bool {
@@ -28,11 +28,11 @@ func IsInternal(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == PallasErrorReason_INTERNAL.String() && e.Code == 500
+	return e.Reason == DeepLXErrorReason_INTERNAL.String() && e.Code == 500
 }
 
 func ErrorInternal(format string, args ...interface{}) *errors.Error {
-	return errors.New(500, PallasErrorReason_INTERNAL.String(), fmt.Sprintf(format, args...))
+	return errors.New(500, DeepLXErrorReason_INTERNAL.String(), fmt.Sprintf(format, args...))
 }
 
 func IsNotFound(err error) bool {
@@ -40,21 +40,33 @@ func IsNotFound(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == PallasErrorReason_NOT_FOUND.String() && e.Code == 404
+	return e.Reason == DeepLXErrorReason_NOT_FOUND.String() && e.Code == 404
 }
 
 func ErrorNotFound(format string, args ...interface{}) *errors.Error {
-	return errors.New(404, PallasErrorReason_NOT_FOUND.String(), fmt.Sprintf(format, args...))
+	return errors.New(404, DeepLXErrorReason_NOT_FOUND.String(), fmt.Sprintf(format, args...))
 }
 
-func IsConflict(err error) bool {
+func IsUnauthenticated(err error) bool {
 	if err == nil {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == PallasErrorReason_CONFLICT.String() && e.Code == 409
+	return e.Reason == DeepLXErrorReason_UNAUTHENTICATED.String() && e.Code == 401
 }
 
-func ErrorConflict(format string, args ...interface{}) *errors.Error {
-	return errors.New(409, PallasErrorReason_CONFLICT.String(), fmt.Sprintf(format, args...))
+func ErrorUnauthenticated(format string, args ...interface{}) *errors.Error {
+	return errors.New(401, DeepLXErrorReason_UNAUTHENTICATED.String(), fmt.Sprintf(format, args...))
+}
+
+func IsPermissionDenied(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == DeepLXErrorReason_PERMISSION_DENIED.String() && e.Code == 403
+}
+
+func ErrorPermissionDenied(format string, args ...interface{}) *errors.Error {
+	return errors.New(403, DeepLXErrorReason_PERMISSION_DENIED.String(), fmt.Sprintf(format, args...))
 }

@@ -16,3 +16,5 @@ fabric.properties
 *.out
 go.work
 go.work.sum
+
+app/**/bin

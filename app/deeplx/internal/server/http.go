@@ -16,7 +16,6 @@ import (
 
 func NewHTTPServer(
 	c *conf.Server,
-	sc *conf.Secret,
 	ds *service.DeepLXService,
 	logger log.Logger,
 ) *http.Server {
@@ -26,7 +25,7 @@ func NewHTTPServer(
 			recovery.Recovery(),
 			logging.Server(logger),
 			validate.Validator(),
-			middleware.Auth(sc.GetAuth().GetToken()),
+			middleware.Auth(),
 		),
 		http.Filter(
 			handlers.CORS(

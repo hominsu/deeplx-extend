@@ -23,8 +23,8 @@ import (
 func initApp(confServer *conf.Server, confSecret *conf.Secret, logger log.Logger, clients ...*fasthttp.Client) (*kratos.App, func(), error) {
 	translateService := deeplx.NewTranslateService(logger)
 	clientPool, cleanup := client_pool.NewClientPool(clients...)
-	deepLXService := service.NewDeepLXService(translateService, clientPool, logger)
-	httpServer := server.NewHTTPServer(confServer, confSecret, deepLXService, logger)
+	deepLXService := service.NewDeepLXService(translateService, confSecret, clientPool, logger)
+	httpServer := server.NewHTTPServer(confServer, deepLXService, logger)
 	app := newApp(logger, httpServer)
 	return app, func() {
 		cleanup()
