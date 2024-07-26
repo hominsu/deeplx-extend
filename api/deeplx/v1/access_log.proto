@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package deeplx.v1;
+
+import "deeplx/v1/types.proto";
+import "gnostic/openapi/v3/annotations.proto";
+import "google/api/annotations.proto";
+
+option go_package = "github.com/oio-network/deeplx-extend/api/deeplx/v1;v1";
+option java_multiple_files = true;
+
+service AccessLogService {
+  rpc GetAccessLog (GetGetAccessLogRequest) returns (AccessLog) {
+    option (google.api.http) = {
+      get: "/v1/access_logs/{id}",
+    };
+
+    option (gnostic.openapi.v3.operation) = {description: "get access log by id"};
+  };
+}
+
+message GetGetAccessLogRequest {
+  int64 id = 1;
+  View view = 2;
+}

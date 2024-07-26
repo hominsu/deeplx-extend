@@ -3,6 +3,7 @@ module github.com/oio-network/deeplx-extend
 go 1.22
 
 require (
+	github.com/envoyproxy/protoc-gen-validate v1.0.4
 	github.com/go-kratos/kratos/v2 v2.7.3
 	github.com/google/gnostic v0.7.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20240711142825-46eb208f015d
