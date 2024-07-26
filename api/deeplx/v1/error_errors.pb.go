@@ -23,28 +23,40 @@ func ErrorUnknown(format string, args ...interface{}) *errors.Error {
 	return errors.New(500, DeepLXErrorReason_UNKNOWN.String(), fmt.Sprintf(format, args...))
 }
 
-func IsInternal(err error) bool {
+func IsInvalidArgument(err error) bool {
 	if err == nil {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == DeepLXErrorReason_INTERNAL.String() && e.Code == 500
+	return e.Reason == DeepLXErrorReason_INVALID_ARGUMENT.String() && e.Code == 400
 }
 
-func ErrorInternal(format string, args ...interface{}) *errors.Error {
-	return errors.New(500, DeepLXErrorReason_INTERNAL.String(), fmt.Sprintf(format, args...))
+func ErrorInvalidArgument(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, DeepLXErrorReason_INVALID_ARGUMENT.String(), fmt.Sprintf(format, args...))
 }
 
-func IsNotFound(err error) bool {
+func IsFailedPrecondition(err error) bool {
 	if err == nil {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == DeepLXErrorReason_NOT_FOUND.String() && e.Code == 404
+	return e.Reason == DeepLXErrorReason_FAILED_PRECONDITION.String() && e.Code == 400
 }
 
-func ErrorNotFound(format string, args ...interface{}) *errors.Error {
-	return errors.New(404, DeepLXErrorReason_NOT_FOUND.String(), fmt.Sprintf(format, args...))
+func ErrorFailedPrecondition(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, DeepLXErrorReason_FAILED_PRECONDITION.String(), fmt.Sprintf(format, args...))
+}
+
+func IsOutOfRange(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == DeepLXErrorReason_OUT_OF_RANGE.String() && e.Code == 400
+}
+
+func ErrorOutOfRange(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, DeepLXErrorReason_OUT_OF_RANGE.String(), fmt.Sprintf(format, args...))
 }
 
 func IsUnauthenticated(err error) bool {
@@ -69,4 +81,124 @@ func IsPermissionDenied(err error) bool {
 
 func ErrorPermissionDenied(format string, args ...interface{}) *errors.Error {
 	return errors.New(403, DeepLXErrorReason_PERMISSION_DENIED.String(), fmt.Sprintf(format, args...))
+}
+
+func IsNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == DeepLXErrorReason_NOT_FOUND.String() && e.Code == 404
+}
+
+func ErrorNotFound(format string, args ...interface{}) *errors.Error {
+	return errors.New(404, DeepLXErrorReason_NOT_FOUND.String(), fmt.Sprintf(format, args...))
+}
+
+func IsAborted(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == DeepLXErrorReason_ABORTED.String() && e.Code == 409
+}
+
+func ErrorAborted(format string, args ...interface{}) *errors.Error {
+	return errors.New(409, DeepLXErrorReason_ABORTED.String(), fmt.Sprintf(format, args...))
+}
+
+func IsAlreadyExists(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == DeepLXErrorReason_ALREADY_EXISTS.String() && e.Code == 409
+}
+
+func ErrorAlreadyExists(format string, args ...interface{}) *errors.Error {
+	return errors.New(409, DeepLXErrorReason_ALREADY_EXISTS.String(), fmt.Sprintf(format, args...))
+}
+
+func IsResourceExhausted(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == DeepLXErrorReason_RESOURCE_EXHAUSTED.String() && e.Code == 429
+}
+
+func ErrorResourceExhausted(format string, args ...interface{}) *errors.Error {
+	return errors.New(429, DeepLXErrorReason_RESOURCE_EXHAUSTED.String(), fmt.Sprintf(format, args...))
+}
+
+func IsCancelled(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == DeepLXErrorReason_CANCELLED.String() && e.Code == 499
+}
+
+func ErrorCancelled(format string, args ...interface{}) *errors.Error {
+	return errors.New(499, DeepLXErrorReason_CANCELLED.String(), fmt.Sprintf(format, args...))
+}
+
+func IsInternal(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == DeepLXErrorReason_INTERNAL.String() && e.Code == 500
+}
+
+func ErrorInternal(format string, args ...interface{}) *errors.Error {
+	return errors.New(500, DeepLXErrorReason_INTERNAL.String(), fmt.Sprintf(format, args...))
+}
+
+func IsDataLoss(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == DeepLXErrorReason_DATA_LOSS.String() && e.Code == 500
+}
+
+func ErrorDataLoss(format string, args ...interface{}) *errors.Error {
+	return errors.New(500, DeepLXErrorReason_DATA_LOSS.String(), fmt.Sprintf(format, args...))
+}
+
+func IsNotImplemented(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == DeepLXErrorReason_NOT_IMPLEMENTED.String() && e.Code == 501
+}
+
+func ErrorNotImplemented(format string, args ...interface{}) *errors.Error {
+	return errors.New(501, DeepLXErrorReason_NOT_IMPLEMENTED.String(), fmt.Sprintf(format, args...))
+}
+
+func IsUnavailable(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == DeepLXErrorReason_UNAVAILABLE.String() && e.Code == 503
+}
+
+func ErrorUnavailable(format string, args ...interface{}) *errors.Error {
+	return errors.New(503, DeepLXErrorReason_UNAVAILABLE.String(), fmt.Sprintf(format, args...))
+}
+
+func IsDeadlineExceeded(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == DeepLXErrorReason_DEADLINE_EXCEEDED.String() && e.Code == 504
+}
+
+func ErrorDeadlineExceeded(format string, args ...interface{}) *errors.Error {
+	return errors.New(504, DeepLXErrorReason_DEADLINE_EXCEEDED.String(), fmt.Sprintf(format, args...))
 }

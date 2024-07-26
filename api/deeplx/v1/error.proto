@@ -11,8 +11,19 @@ enum DeepLXErrorReason {
   option (errors.default_code) = 500;
 
   UNKNOWN = 0;
-  INTERNAL = 1;
-  NOT_FOUND = 2 [(errors.code) = 404];
-  UNAUTHENTICATED = 3 [(errors.code) = 401];
-  PERMISSION_DENIED = 4 [(errors.code) = 403];
+  INVALID_ARGUMENT = 1 [(errors.code) = 400];
+  FAILED_PRECONDITION = 2 [(errors.code) = 400];
+  OUT_OF_RANGE = 3 [(errors.code) = 400];
+  UNAUTHENTICATED = 4 [(errors.code) = 401];
+  PERMISSION_DENIED = 5 [(errors.code) = 403];
+  NOT_FOUND = 6 [(errors.code) = 404];
+  ABORTED = 7 [(errors.code) = 409];
+  ALREADY_EXISTS = 8 [(errors.code) = 409];
+  RESOURCE_EXHAUSTED = 9 [(errors.code) = 429];
+  CANCELLED = 10 [(errors.code) = 499];
+  INTERNAL = 11;
+  DATA_LOSS = 12;
+  NOT_IMPLEMENTED = 13 [(errors.code) = 501];
+  UNAVAILABLE = 14 [(errors.code) = 503];
+  DEADLINE_EXCEEDED = 15 [(errors.code) = 504];
 }
