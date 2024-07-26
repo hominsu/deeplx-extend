@@ -14,16 +14,17 @@ import (
 	"github.com/oio-network/deeplx-extend/app/deeplx/internal/service"
 	"github.com/oio-network/deeplx-extend/app/deeplx/pkgs/client_pool"
 	"github.com/oio-network/deeplx-extend/deeplx"
+	"github.com/oschwald/geoip2-golang"
 	"github.com/valyala/fasthttp"
 )
 
 // Injectors from wire.go:
 
 // initApp init kratos application.
-func initApp(confServer *conf.Server, confSecret *conf.Secret, logger log.Logger, clients ...*fasthttp.Client) (*kratos.App, func(), error) {
+func initApp(confServer *conf.Server, confSecret *conf.Secret, db *geoip2.Reader, logger log.Logger, clients ...*fasthttp.Client) (*kratos.App, func(), error) {
 	translateService := deeplx.NewTranslateService(logger)
 	clientPool, cleanup := client_pool.NewClientPool(clients...)
-	deepLXService := service.NewDeepLXService(translateService, confSecret, clientPool, logger)
+	deepLXService := service.NewDeepLXService(translateService, confSecret, clientPool, db, logger)
 	httpServer := server.NewHTTPServer(confServer, deepLXService, logger)
 	app := newApp(logger, httpServer)
 	return app, func() {

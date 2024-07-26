@@ -9,6 +9,7 @@ import (
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"
+	"github.com/oschwald/geoip2-golang"
 	"github.com/valyala/fasthttp"
 
 	"github.com/oio-network/deeplx-extend/app/deeplx/internal/conf"
@@ -20,6 +21,7 @@ import (
 func initApp(
 	confServer *conf.Server,
 	confSecret *conf.Secret,
+	db *geoip2.Reader,
 	logger log.Logger,
 	clients ...*fasthttp.Client,
 ) (*kratos.App, func(), error) {

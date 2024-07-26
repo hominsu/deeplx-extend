@@ -11,6 +11,7 @@ import (
 	"github.com/go-kratos/kratos/v2/encoding/json"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/oschwald/geoip2-golang"
 	"github.com/valyala/fasthttp"
 	"google.golang.org/protobuf/encoding/protojson"
 
@@ -21,16 +22,22 @@ import (
 var (
 	// Name is the name of the compiled software.
 	Name = "deeplx-extend.deeplx"
+
 	// Version is the version of the compiled software.
 	Version string
+
 	// flagconf is the config flag.
 	flagconf string
+
+	// flagGeoLite is the IP database
+	flagGeoLite string
 
 	id, _ = os.Hostname()
 )
 
 func init() {
 	flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf config.yaml")
+	flag.StringVar(&flagGeoLite, "geolite2", "../../data/GeoLite2-Country.mmdb", "MaxMind's GeoLite2 Country database, eg: -geolite2 GeoLite2-Country.mmdb")
 
 	json.MarshalOptions = protojson.MarshalOptions{
 		EmitUnpopulated: false,
@@ -72,6 +79,16 @@ func main() {
 		panic(err)
 	}
 
+	db, err := geoip2.Open(flagGeoLite)
+	if err != nil {
+		panic(err)
+	}
+	defer func(db *geoip2.Reader) {
+		if err := db.Close(); err != nil {
+			log.Error(err)
+		}
+	}(db)
+
 	logger := log.With(log.NewStdLogger(os.Stdout),
 		"service.id", id,
 		"service.name", Name,
@@ -80,7 +97,7 @@ func main() {
 		"caller", log.Caller(6),
 	)
 
-	app, cleanup, err := initApp(bc.Server, bc.Secret, logger, &fasthttp.Client{})
+	app, cleanup, err := initApp(bc.Server, bc.Secret, db, logger, &fasthttp.Client{})
 	if err != nil {
 		panic(err)
 	}
