@@ -5,10 +5,10 @@ import (
 	"errors"
 	"strconv"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-redis/cache/v9"
 	"golang.org/x/sync/singleflight"
 
 	v1 "github.com/oio-network/deeplx-extend/api/deeplx/v1"
@@ -16,6 +16,7 @@ import (
 	"github.com/oio-network/deeplx-extend/app/deeplx/internal/data/ent"
 	"github.com/oio-network/deeplx-extend/app/deeplx/internal/data/ent/accesslog"
 	"github.com/oio-network/deeplx-extend/app/deeplx/internal/data/ent/user"
+	"github.com/oio-network/deeplx-extend/pkgs/pagination"
 )
 
 var _ biz.AccessLogRepo = (*accessLogRepo)(nil)
@@ -38,6 +39,8 @@ func NewAccessLogRepo(data *Data, logger log.Logger) biz.AccessLogRepo {
 	}
 	ar.ck = make(map[string][]string)
 	ar.ck["Get"] = []string{"get", "access_log", "id"}
+	ar.ck["List"] = []string{"list", "access_log"}
+	ar.ck["CountIP"] = []string{"count", "ip"}
 	return ar
 }
 
@@ -73,11 +76,11 @@ func (r *accessLogRepo) Get(ctx context.Context, logId int64, view v1.View) (*bi
 		res, err, _ = r.sg.Do(key, func() (any, error) {
 			get := &ent.AccessLog{}
 			// get cache
-			cErr := r.data.cache.Get(ctx, key, get)
-			if cErr != nil && errors.Is(cErr, cache.ErrCacheMiss) { // cache miss
+			cErr := r.data.cache.Get(ctx, time.Minute, key, get, func(ctx context.Context) (any, error) { // cache miss
 				// get from db
-				get, cErr = r.data.db.AccessLog.Get(ctx, logId)
-			}
+				return r.data.db.AccessLog.Get(ctx, logId)
+			})
+
 			return get, cErr
 		})
 	case v1.View_WITH_EDGE_IDS:
@@ -86,37 +89,156 @@ func (r *accessLogRepo) Get(ctx context.Context, logId int64, view v1.View) (*bi
 		res, err, _ = r.sg.Do(key, func() (any, error) {
 			get := &ent.AccessLog{}
 			// get cache
-			cErr := r.data.cache.Get(ctx, key, get)
-			if cErr != nil && errors.Is(cErr, cache.ErrCacheMiss) { // cache miss
+			cErr := r.data.cache.Get(ctx, time.Minute, key, get, func(ctx context.Context) (any, error) { // cache miss
 				// get from db
-				get, cErr = r.data.db.AccessLog.Query().
+				return r.data.db.AccessLog.Query().
 					Where(accesslog.ID(logId)).
 					WithOwnerUser(func(query *ent.UserQuery) {
 						query.Select(user.FieldID)
 						query.Select(user.FieldToken)
 					}).
 					Only(ctx)
-			}
+			})
+
 			return get, cErr
 		})
 	default:
 		return nil, v1.ErrorInvalidArgument("invalid argument: unknown view")
 	}
 	switch {
-	case err == nil: // db hit, set cache
-		if err = r.data.cache.Set(&cache.Item{
-			Ctx:   ctx,
-			Key:   key,
-			Value: res.(*ent.AccessLog),
-			TTL:   r.data.conf.Cache.Ttl.AsDuration(),
-		}); err != nil {
-			r.log.Errorf("cache error: %v", err)
-		}
+	case err == nil:
 		return toAccessLog(res.(*ent.AccessLog))
 	case ent.IsNotFound(err): // db miss
 		return nil, v1.ErrorNotFound("access log not found: %v", err)
 	default: // error
 		return nil, v1.ErrorUnknown("unknown error: %v", err)
+	}
+}
+
+func (r *accessLogRepo) List(
+	ctx context.Context,
+	pageSize int,
+	pageToken string,
+	view v1.View,
+) (*biz.AccessLogPage, error) {
+	// list access logs
+	listQuery := r.data.db.AccessLog.Query().
+		Order(ent.Asc(user.FieldID)).
+		Limit(pageSize + 1)
+	if pageToken != "" {
+		token, pErr := pagination.DecodePageToken(pageToken)
+		if pErr != nil {
+			return nil, v1.ErrorInternal("decode page token err: %v", pErr)
+		}
+		listQuery = listQuery.Where(accesslog.IDGTE(token))
+	}
+
+	// key: access_log_cache_key_list_access_log:pageSize_pageToken
+	key := r.cacheKey(
+		strings.Join([]string{strconv.FormatInt(int64(pageSize), 10), pageToken}, "_"),
+		r.ck["List"]...,
+	)
+
+	var (
+		err error
+		res any
+	)
+
+	switch view {
+	case v1.View_VIEW_UNSPECIFIED, v1.View_BASIC:
+		res, err, _ = r.sg.Do(key, func() (any, error) {
+			var ids []int64
+			// get cache
+			if cErr := r.data.cache.Get(ctx, time.Minute, key, ids, func(ctx context.Context) (any, error) {
+				// get from db
+				return listQuery.IDs(ctx)
+			}); cErr != nil {
+				return nil, cErr
+			}
+
+			logs := make([]*biz.AccessLog, 0, len(ids))
+			for _, id := range ids {
+				al, _ := r.Get(ctx, id, view)
+				logs = append(logs, al)
+			}
+
+			return logs, nil
+		})
+	case v1.View_WITH_EDGE_IDS:
+		res, err, _ = r.sg.Do(key, func() (any, error) {
+			var ids []int64
+			// get cache
+			if cErr := r.data.cache.Get(ctx, time.Minute, key, ids, func(ctx context.Context) (any, error) {
+				// get from db
+				return listQuery.WithOwnerUser(func(query *ent.UserQuery) {
+					query.Select(user.FieldID)
+					query.Select(user.FieldToken)
+				}).IDs(ctx)
+			}); cErr != nil {
+				return nil, cErr
+			}
+
+			logs := make([]*biz.AccessLog, 0, len(ids))
+			for _, id := range ids {
+				al, err := r.Get(ctx, id, view)
+				if err != nil {
+					r.data.log.Warn(err)
+				}
+				logs = append(logs, al)
+			}
+
+			return logs, nil
+		})
+	default:
+		return nil, v1.ErrorInvalidArgument("invalid argument: unknown view")
+	}
+	switch {
+	case err == nil: // db hit, set cache
+		logs := res.([]*biz.AccessLog)
+
+		// generate next page token
+		var nextPageToken string
+		if len(logs) == pageSize+1 {
+			nextPageToken, err = pagination.EncodePageToken(logs[len(logs)-1].ID)
+			if err != nil {
+				return nil, v1.ErrorInternal("encode page token error: %v", err)
+			}
+			logs = logs[:len(logs)-1]
+		}
+
+		return &biz.AccessLogPage{
+			AccessLogs:    logs,
+			NextPageToken: nextPageToken,
+		}, nil
+	case ent.IsNotFound(err): // db miss
+		return nil, v1.ErrorNotFound("access log not found: %v", err)
+	default: // error
+		return nil, v1.ErrorUnknown("unknown error: %v", err)
+	}
+}
+
+func (r *accessLogRepo) CountIP(ctx context.Context, ip string) (int64, error) {
+	// key: access_log_cache_key_count_ip:ip
+	key := r.cacheKey(ip, r.ck["CountIP"]...)
+	res, err, _ := r.sg.Do(key, func() (any, error) {
+		var ids []int64
+		// get cache
+		cErr := r.data.cache.Get(ctx, time.Minute, key, ids, func(ctx context.Context) (any, error) { // cache miss
+			// get from db
+			return r.data.db.AccessLog.Query().
+				Where(accesslog.IP(ip)).
+				IDs(ctx)
+		})
+
+		return ids, cErr
+	})
+	switch {
+	case err == nil:
+		return int64(len(res.([]int64))), nil
+	case ent.IsNotFound(err): // db miss
+		return 0, v1.ErrorNotFound("access log not found: %v", err)
+	default: // error
+		return 0, v1.ErrorUnknown("unknown error: %v", err)
 	}
 }
 

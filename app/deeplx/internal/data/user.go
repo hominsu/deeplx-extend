@@ -9,7 +9,6 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-redis/cache/v9"
 	"golang.org/x/sync/singleflight"
 
 	v1 "github.com/oio-network/deeplx-extend/api/deeplx/v1"
@@ -40,6 +39,7 @@ func NewUserRepo(data *Data, logger log.Logger) biz.UserRepo {
 	}
 	ur.ck = make(map[string][]string)
 	ur.ck["Get"] = []string{"get", "user", "id"}
+	ur.ck["List"] = []string{"list", "user"}
 	return ur
 }
 
@@ -76,11 +76,11 @@ func (r *userRepo) Get(ctx context.Context, userId int64, view v1.View) (*biz.Us
 		res, err, _ = r.sg.Do(key, func() (any, error) {
 			get := &ent.User{}
 			// get cache
-			cErr := r.data.cache.Get(ctx, key, get)
-			if cErr != nil && errors.Is(cErr, cache.ErrCacheMiss) { // cache miss
+			cErr := r.data.cache.Get(ctx, time.Minute, key, get, func(ctx context.Context) (any, error) { // cache miss
 				// get from db
-				get, cErr = r.data.db.User.Get(ctx, userId)
-			}
+				return r.data.db.User.Get(ctx, userId)
+			})
+
 			return get, cErr
 		})
 	case v1.View_WITH_EDGE_IDS:
@@ -89,10 +89,9 @@ func (r *userRepo) Get(ctx context.Context, userId int64, view v1.View) (*biz.Us
 		res, err, _ = r.sg.Do(key, func() (any, error) {
 			get := &ent.User{}
 			// get cache
-			cErr := r.data.cache.Get(ctx, key, get)
-			if cErr != nil && errors.Is(cErr, cache.ErrCacheMiss) { // cache miss
+			cErr := r.data.cache.Get(ctx, time.Minute, key, get, func(ctx context.Context) (any, error) { // cache miss
 				// get from db
-				get, cErr = r.data.db.User.Query().
+				return r.data.db.User.Query().
 					Where(user.ID(userId)).
 					WithAccessLogs(func(query *ent.AccessLogQuery) {
 						query.Select(accesslog.FieldID)
@@ -101,7 +100,8 @@ func (r *userRepo) Get(ctx context.Context, userId int64, view v1.View) (*biz.Us
 						query.Select(accesslog.FieldCountryCode)
 					}).
 					Only(ctx)
-			}
+			})
+
 			return get, cErr
 		})
 	default:
@@ -109,14 +109,6 @@ func (r *userRepo) Get(ctx context.Context, userId int64, view v1.View) (*biz.Us
 	}
 	switch {
 	case err == nil: // db hit, set cache
-		if err = r.data.cache.Set(&cache.Item{
-			Ctx:   ctx,
-			Key:   key,
-			Value: res.(*ent.User),
-			TTL:   r.data.conf.Cache.Ttl.AsDuration(),
-		}); err != nil {
-			r.log.Errorf("cache error: %v", err)
-		}
 		return toUser(res.(*ent.User))
 	case ent.IsNotFound(err): // db miss
 		return nil, v1.ErrorNotFound("user not found: %v", err)
@@ -143,82 +135,83 @@ func (r *userRepo) List(
 		listQuery = listQuery.Where(user.IDGTE(token))
 	}
 
+	// key: user_cache_key_list_user:pageSize_pageToken
+	key := r.cacheKey(
+		strings.Join([]string{strconv.FormatInt(int64(pageSize), 10), pageToken}, "_"),
+		r.ck["List"]...,
+	)
+
 	var (
 		err error
-		key string
 		res any
 	)
 
 	switch view {
 	case v1.View_VIEW_UNSPECIFIED, v1.View_BASIC:
-		// key: user_cache_key_list_user:pageSize_pageToken
-		key = r.cacheKey(
-			strings.Join([]string{strconv.FormatInt(int64(pageSize), 10), pageToken}, "_"),
-			r.ck["List"]...,
-		)
 		res, err, _ = r.sg.Do(key, func() (any, error) {
-			var entList []*ent.User
+			var ids []int64
 			// get cache
-			cErr := r.data.cache.GetSkippingLocalCache(ctx, key, &entList)
-			if cErr != nil && errors.Is(cErr, cache.ErrCacheMiss) { // cache miss
+			if cErr := r.data.cache.Get(ctx, time.Minute, key, ids, func(ctx context.Context) (any, error) {
 				// get from db
-				entList, cErr = listQuery.All(ctx)
+				return listQuery.IDs(ctx)
+			}); cErr != nil {
+				return nil, cErr
 			}
-			return entList, cErr
+
+			users := make([]*biz.User, 0, len(ids))
+			for _, id := range ids {
+				u, _ := r.Get(ctx, id, view)
+				users = append(users, u)
+			}
+
+			return users, nil
 		})
 	case v1.View_WITH_EDGE_IDS:
-		// key: user_cache_key_list_user_edge_ids:pageSize_pageToken
-		key = r.cacheKey(
-			strings.Join([]string{strconv.FormatInt(int64(pageSize), 10), pageToken}, "_"),
-			append(r.ck["List"], "edge_ids")...,
-		)
 		res, err, _ = r.sg.Do(key, func() (any, error) {
-			var entList []*ent.User
+			var ids []int64
 			// get cache
-			cErr := r.data.cache.GetSkippingLocalCache(ctx, key, &entList)
-			if cErr != nil && errors.Is(cErr, cache.ErrCacheMiss) { // cache miss
+			if cErr := r.data.cache.Get(ctx, time.Minute, key, ids, func(ctx context.Context) (any, error) {
 				// get from db
-				entList, cErr = listQuery.WithAccessLogs(func(query *ent.AccessLogQuery) {
+				return listQuery.WithAccessLogs(func(query *ent.AccessLogQuery) {
 					query.Select(accesslog.FieldID)
 					query.Select(accesslog.FieldIP)
 					query.Select(accesslog.FieldCountryName)
 					query.Select(accesslog.FieldCountryCode)
-				}).All(ctx)
+				}).IDs(ctx)
+			}); cErr != nil {
+				return nil, cErr
 			}
-			return entList, cErr
+
+			users := make([]*biz.User, 0, len(ids))
+			for _, id := range ids {
+				u, err := r.Get(ctx, id, view)
+				if err != nil {
+					r.data.log.Warn(err)
+				}
+				users = append(users, u)
+			}
+
+			return users, nil
 		})
 	default:
 		return nil, v1.ErrorInvalidArgument("invalid argument: unknown view")
 	}
 	switch {
 	case err == nil: // db hit, set cache
-		entList := res.([]*ent.User)
-		if err = r.data.cache.Set(&cache.Item{
-			Ctx:            ctx,
-			Key:            key,
-			Value:          entList,
-			TTL:            r.data.conf.Cache.Ttl.AsDuration(),
-			SkipLocalCache: true,
-		}); err != nil {
-			r.log.Errorf("cache error: %v", err)
-		}
+		users := res.([]*biz.User)
 
 		// generate next page token
 		var nextPageToken string
-		if len(entList) == pageSize+1 {
-			nextPageToken, err = pagination.EncodePageToken(entList[len(entList)-1].ID)
+		if len(users) == pageSize+1 {
+			nextPageToken, err = pagination.EncodePageToken(users[len(users)-1].ID)
 			if err != nil {
 				return nil, v1.ErrorInternal("encode page token error: %v", err)
 			}
-			entList = entList[:len(entList)-1]
+			users = users[:len(users)-1]
 		}
 
-		userList, tErr := toUserList(entList)
-		if tErr != nil {
-			return nil, v1.ErrorInternal("internal error: %v", tErr)
-		}
 		return &biz.UserPage{
-			Users:         userList,
+			Users:         users,
 			NextPageToken: nextPageToken,
 		}, nil
 	case ent.IsNotFound(err): // db miss

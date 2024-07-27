@@ -6,6 +6,13 @@ data:
   database:
     driver: sqlite3
     source: file:ent?mode=memory&cache=shared&_fk=1
+  redis:
+    addr: 127.0.0.1:6379
+    password:
+    db: 0
+  cache:
+    disable_client_cache: false
+    ttl: 600s
 secret:
   auth:
     token: homingso
