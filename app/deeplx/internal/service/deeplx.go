@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"net"
 
 	"github.com/go-kratos/kratos/v2/metadata"
 
@@ -30,6 +31,24 @@ func (s *DeepLXService) Translate(ctx context.Context, req *v1.TranslateRequest)
 		if tokenInHeader != token && tokenInQuery != token {
 			return nil, v1.ErrorPermissionDenied("Invalid access token")
 		}
+	}
+
+	var remoteAddr string
+	if md, ok := metadata.FromClientContext(ctx); ok {
+		remoteAddr = md.Get(string(middleware.ContextKeyRemoteAddr))
+	}
+
+	record, err := s.mmdb.Country(net.ParseIP(remoteAddr))
+	if err != nil {
+		return nil, v1.ErrorInternal("missing ip record")
+	}
+
+	if _, err := s.au.Create(ctx, &v1.AccessLog{
+		Ip:          remoteAddr,
+		CountryName: record.Country.Names["en"],
+		CountryCode: record.Country.IsoCode,
+	}); err != nil {
+		return nil, v1.ErrorInternal("write access log failed")
 	}
 
 	payload := req.GetPayload()

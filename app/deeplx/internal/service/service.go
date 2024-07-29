@@ -6,6 +6,7 @@ import (
 	"github.com/oschwald/geoip2-golang"
 
 	v1 "github.com/oio-network/deeplx-extend/api/deeplx/v1"
+	"github.com/oio-network/deeplx-extend/app/deeplx/internal/biz"
 	"github.com/oio-network/deeplx-extend/app/deeplx/internal/conf"
 	"github.com/oio-network/deeplx-extend/app/deeplx/pkgs/client_pool"
 	"github.com/oio-network/deeplx-extend/deeplx"
@@ -21,6 +22,7 @@ var ProviderSet = wire.NewSet(
 type DeepLXService struct {
 	v1.UnimplementedDeepLXServiceServer
 
+	au   *biz.AccessLogUseCase
 	ts   *deeplx.TranslateService
 	cs   *conf.Secret
 	pool *client_pool.ClientPool
@@ -29,6 +31,7 @@ type DeepLXService struct {
 }
 
 func NewDeepLXService(
+	au *biz.AccessLogUseCase,
 	ts *deeplx.TranslateService,
 	cs *conf.Secret,
 	pool *client_pool.ClientPool,
@@ -36,6 +39,7 @@ func NewDeepLXService(
 	logger log.Logger,
 ) *DeepLXService {
 	return &DeepLXService{
+		au:   au,
 		ts:   ts,
 		cs:   cs,
 		pool: pool,

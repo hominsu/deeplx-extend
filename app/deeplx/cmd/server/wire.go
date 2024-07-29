@@ -12,7 +12,9 @@ import (
 	"github.com/oschwald/geoip2-golang"
 	"github.com/valyala/fasthttp"
 
+	"github.com/oio-network/deeplx-extend/app/deeplx/internal/biz"
 	"github.com/oio-network/deeplx-extend/app/deeplx/internal/conf"
+	"github.com/oio-network/deeplx-extend/app/deeplx/internal/data"
 	"github.com/oio-network/deeplx-extend/app/deeplx/internal/server"
 	"github.com/oio-network/deeplx-extend/app/deeplx/internal/service"
 )
@@ -27,6 +29,8 @@ func initApp(
 ) (*kratos.App, func(), error) {
 	panic(
 		wire.Build(
+			data.ProviderSet,
+			biz.ProviderSet,
 			service.ProviderSet,
 			server.ProviderSet,
 			newApp,

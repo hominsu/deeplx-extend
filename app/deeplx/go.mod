@@ -1,6 +1,6 @@
 module github.com/oio-network/deeplx-extend/app/deeplx
 
-go 1.22.5
+go 1.22
 
 replace github.com/oio-network/deeplx-extend => ../../
 
