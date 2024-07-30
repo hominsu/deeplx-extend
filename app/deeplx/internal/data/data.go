@@ -14,8 +14,8 @@ import (
 	"github.com/vmihailenco/msgpack/v5"
 
 	"github.com/oio-network/deeplx-extend/app/deeplx/internal/conf"
-	"github.com/oio-network/deeplx-extend/app/deeplx/internal/data/ent"
-	"github.com/oio-network/deeplx-extend/app/deeplx/internal/data/ent/migrate"
+	"github.com/oio-network/deeplx-extend/schema/ent"
+	"github.com/oio-network/deeplx-extend/schema/ent/migrate"
 
 	// driver
 	_ "github.com/go-sql-driver/mysql"

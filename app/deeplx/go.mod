@@ -1,23 +1,22 @@
 module github.com/oio-network/deeplx-extend/app/deeplx
 
-go 1.22.5
-
-replace github.com/oio-network/deeplx-extend => ../../
+go 1.22
 
 require (
-	entgo.io/ent v0.13.1
+	entgo.io/ent v0.14.0
 	github.com/go-kratos/kratos/v2 v2.8.0
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/google/uuid v1.6.0
 	github.com/google/wire v0.6.0
 	github.com/gorilla/handlers v1.5.2
 	github.com/klauspost/compress v1.17.9
-	github.com/mattn/go-sqlite3 v1.14.16
-	github.com/oio-network/deeplx-extend v0.0.0-20240726072327-d94ab2a9ef01
-	github.com/oio-network/deeplx-extend/deeplx v0.0.0-20240726072327-d94ab2a9ef01
+	github.com/mattn/go-sqlite3 v1.14.22
+	github.com/oio-network/deeplx-extend v0.0.0-20240730081700-0d46cbb45fb2
+	github.com/oio-network/deeplx-extend/deeplx v0.0.0-20240730081700-0d46cbb45fb2
+	github.com/oio-network/deeplx-extend/schema v0.0.0-20240730081700-0d46cbb45fb2
 	github.com/oschwald/geoip2-golang v1.11.0
 	github.com/redis/go-redis/v9 v9.6.1
-	github.com/redis/rueidis v1.0.41
+	github.com/redis/rueidis v1.0.43
 	github.com/valyala/fasthttp v1.55.0
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	golang.org/x/sync v0.7.0
@@ -47,7 +46,7 @@ require (
 	github.com/hashicorp/hcl/v2 v2.21.0 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/oschwald/maxminddb-golang v1.13.1 // indirect
-	github.com/tidwall/gjson v1.17.1 // indirect
+	github.com/tidwall/gjson v1.17.2 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
@@ -63,3 +62,5 @@ require (
 	google.golang.org/grpc v1.65.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/oio-network/deeplx-extend => ../../

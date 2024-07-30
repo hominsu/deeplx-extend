@@ -13,10 +13,10 @@ import (
 
 	v1 "github.com/oio-network/deeplx-extend/api/deeplx/v1"
 	"github.com/oio-network/deeplx-extend/app/deeplx/internal/biz"
-	"github.com/oio-network/deeplx-extend/app/deeplx/internal/data/ent"
-	"github.com/oio-network/deeplx-extend/app/deeplx/internal/data/ent/accesslog"
-	"github.com/oio-network/deeplx-extend/app/deeplx/internal/data/ent/user"
 	"github.com/oio-network/deeplx-extend/pkgs/pagination"
+	"github.com/oio-network/deeplx-extend/schema/ent"
+	"github.com/oio-network/deeplx-extend/schema/ent/accesslog"
+	"github.com/oio-network/deeplx-extend/schema/ent/user"
 )
 
 var _ biz.UserRepo = (*userRepo)(nil)
