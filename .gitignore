@@ -19,6 +19,7 @@ go.work.sum
 
 app/**/bin
 app/**/data
+!app/**/internal/data
 
 /deploy/dev/mysql/mysql
 /deploy/dev/redis/data
