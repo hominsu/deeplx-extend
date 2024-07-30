@@ -1,6 +1,6 @@
 module github.com/oio-network/deeplx-extend/schema
 
-go 1.22.5
+go 1.22
 
 require (
 	entgo.io/ent v0.14.0
