@@ -63,9 +63,25 @@ func (alc *AccessLogCreate) SetCountryName(s string) *AccessLogCreate {
 	return alc
 }
 
+// SetNillableCountryName sets the "country_name" field if the given value is not nil.
+func (alc *AccessLogCreate) SetNillableCountryName(s *string) *AccessLogCreate {
+	if s != nil {
+		alc.SetCountryName(*s)
+	}
+	return alc
+}
+
 // SetCountryCode sets the "country_code" field.
 func (alc *AccessLogCreate) SetCountryCode(s string) *AccessLogCreate {
 	alc.mutation.SetCountryCode(s)
+	return alc
+}
+
+// SetNillableCountryCode sets the "country_code" field if the given value is not nil.
+func (alc *AccessLogCreate) SetNillableCountryCode(s *string) *AccessLogCreate {
+	if s != nil {
+		alc.SetCountryCode(*s)
+	}
 	return alc
 }
 
@@ -142,12 +158,6 @@ func (alc *AccessLogCreate) check() error {
 	}
 	if _, ok := alc.mutation.IP(); !ok {
 		return &ValidationError{Name: "ip", err: errors.New(`ent: missing required field "AccessLog.ip"`)}
-	}
-	if _, ok := alc.mutation.CountryName(); !ok {
-		return &ValidationError{Name: "country_name", err: errors.New(`ent: missing required field "AccessLog.country_name"`)}
-	}
-	if _, ok := alc.mutation.CountryCode(); !ok {
-		return &ValidationError{Name: "country_code", err: errors.New(`ent: missing required field "AccessLog.country_code"`)}
 	}
 	return nil
 }
@@ -309,6 +319,12 @@ func (u *AccessLogUpsert) UpdateCountryName() *AccessLogUpsert {
 	return u
 }
 
+// ClearCountryName clears the value of the "country_name" field.
+func (u *AccessLogUpsert) ClearCountryName() *AccessLogUpsert {
+	u.SetNull(accesslog.FieldCountryName)
+	return u
+}
+
 // SetCountryCode sets the "country_code" field.
 func (u *AccessLogUpsert) SetCountryCode(v string) *AccessLogUpsert {
 	u.Set(accesslog.FieldCountryCode, v)
@@ -318,6 +334,12 @@ func (u *AccessLogUpsert) SetCountryCode(v string) *AccessLogUpsert {
 // UpdateCountryCode sets the "country_code" field to the value that was provided on create.
 func (u *AccessLogUpsert) UpdateCountryCode() *AccessLogUpsert {
 	u.SetExcluded(accesslog.FieldCountryCode)
+	return u
+}
+
+// ClearCountryCode clears the value of the "country_code" field.
+func (u *AccessLogUpsert) ClearCountryCode() *AccessLogUpsert {
+	u.SetNull(accesslog.FieldCountryCode)
 	return u
 }
 
@@ -421,6 +443,13 @@ func (u *AccessLogUpsertOne) UpdateCountryName() *AccessLogUpsertOne {
 	})
 }
 
+// ClearCountryName clears the value of the "country_name" field.
+func (u *AccessLogUpsertOne) ClearCountryName() *AccessLogUpsertOne {
+	return u.Update(func(s *AccessLogUpsert) {
+		s.ClearCountryName()
+	})
+}
+
 // SetCountryCode sets the "country_code" field.
 func (u *AccessLogUpsertOne) SetCountryCode(v string) *AccessLogUpsertOne {
 	return u.Update(func(s *AccessLogUpsert) {
@@ -432,6 +461,13 @@ func (u *AccessLogUpsertOne) SetCountryCode(v string) *AccessLogUpsertOne {
 func (u *AccessLogUpsertOne) UpdateCountryCode() *AccessLogUpsertOne {
 	return u.Update(func(s *AccessLogUpsert) {
 		s.UpdateCountryCode()
+	})
+}
+
+// ClearCountryCode clears the value of the "country_code" field.
+func (u *AccessLogUpsertOne) ClearCountryCode() *AccessLogUpsertOne {
+	return u.Update(func(s *AccessLogUpsert) {
+		s.ClearCountryCode()
 	})
 }
 
@@ -701,6 +737,13 @@ func (u *AccessLogUpsertBulk) UpdateCountryName() *AccessLogUpsertBulk {
 	})
 }
 
+// ClearCountryName clears the value of the "country_name" field.
+func (u *AccessLogUpsertBulk) ClearCountryName() *AccessLogUpsertBulk {
+	return u.Update(func(s *AccessLogUpsert) {
+		s.ClearCountryName()
+	})
+}
+
 // SetCountryCode sets the "country_code" field.
 func (u *AccessLogUpsertBulk) SetCountryCode(v string) *AccessLogUpsertBulk {
 	return u.Update(func(s *AccessLogUpsert) {
@@ -712,6 +755,13 @@ func (u *AccessLogUpsertBulk) SetCountryCode(v string) *AccessLogUpsertBulk {
 func (u *AccessLogUpsertBulk) UpdateCountryCode() *AccessLogUpsertBulk {
 	return u.Update(func(s *AccessLogUpsert) {
 		s.UpdateCountryCode()
+	})
+}
+
+// ClearCountryCode clears the value of the "country_code" field.
+func (u *AccessLogUpsertBulk) ClearCountryCode() *AccessLogUpsertBulk {
+	return u.Update(func(s *AccessLogUpsert) {
+		s.ClearCountryCode()
 	})
 }
 

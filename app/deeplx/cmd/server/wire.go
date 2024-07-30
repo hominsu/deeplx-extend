@@ -22,6 +22,7 @@ import (
 // initApp init kratos application.
 func initApp(
 	confServer *conf.Server,
+	confData *conf.Data,
 	confSecret *conf.Secret,
 	db *geoip2.Reader,
 	logger log.Logger,

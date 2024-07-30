@@ -77,6 +77,12 @@ func (alu *AccessLogUpdate) SetNillableCountryName(s *string) *AccessLogUpdate {
 	return alu
 }
 
+// ClearCountryName clears the value of the "country_name" field.
+func (alu *AccessLogUpdate) ClearCountryName() *AccessLogUpdate {
+	alu.mutation.ClearCountryName()
+	return alu
+}
+
 // SetCountryCode sets the "country_code" field.
 func (alu *AccessLogUpdate) SetCountryCode(s string) *AccessLogUpdate {
 	alu.mutation.SetCountryCode(s)
@@ -88,6 +94,12 @@ func (alu *AccessLogUpdate) SetNillableCountryCode(s *string) *AccessLogUpdate {
 	if s != nil {
 		alu.SetCountryCode(*s)
 	}
+	return alu
+}
+
+// ClearCountryCode clears the value of the "country_code" field.
+func (alu *AccessLogUpdate) ClearCountryCode() *AccessLogUpdate {
+	alu.mutation.ClearCountryCode()
 	return alu
 }
 
@@ -169,8 +181,14 @@ func (alu *AccessLogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := alu.mutation.CountryName(); ok {
 		_spec.SetField(accesslog.FieldCountryName, field.TypeString, value)
 	}
+	if alu.mutation.CountryNameCleared() {
+		_spec.ClearField(accesslog.FieldCountryName, field.TypeString)
+	}
 	if value, ok := alu.mutation.CountryCode(); ok {
 		_spec.SetField(accesslog.FieldCountryCode, field.TypeString, value)
+	}
+	if alu.mutation.CountryCodeCleared() {
+		_spec.ClearField(accesslog.FieldCountryCode, field.TypeString)
 	}
 	if alu.mutation.OwnerUserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -271,6 +289,12 @@ func (aluo *AccessLogUpdateOne) SetNillableCountryName(s *string) *AccessLogUpda
 	return aluo
 }
 
+// ClearCountryName clears the value of the "country_name" field.
+func (aluo *AccessLogUpdateOne) ClearCountryName() *AccessLogUpdateOne {
+	aluo.mutation.ClearCountryName()
+	return aluo
+}
+
 // SetCountryCode sets the "country_code" field.
 func (aluo *AccessLogUpdateOne) SetCountryCode(s string) *AccessLogUpdateOne {
 	aluo.mutation.SetCountryCode(s)
@@ -282,6 +306,12 @@ func (aluo *AccessLogUpdateOne) SetNillableCountryCode(s *string) *AccessLogUpda
 	if s != nil {
 		aluo.SetCountryCode(*s)
 	}
+	return aluo
+}
+
+// ClearCountryCode clears the value of the "country_code" field.
+func (aluo *AccessLogUpdateOne) ClearCountryCode() *AccessLogUpdateOne {
+	aluo.mutation.ClearCountryCode()
 	return aluo
 }
 
@@ -393,8 +423,14 @@ func (aluo *AccessLogUpdateOne) sqlSave(ctx context.Context) (_node *AccessLog, 
 	if value, ok := aluo.mutation.CountryName(); ok {
 		_spec.SetField(accesslog.FieldCountryName, field.TypeString, value)
 	}
+	if aluo.mutation.CountryNameCleared() {
+		_spec.ClearField(accesslog.FieldCountryName, field.TypeString)
+	}
 	if value, ok := aluo.mutation.CountryCode(); ok {
 		_spec.SetField(accesslog.FieldCountryCode, field.TypeString, value)
+	}
+	if aluo.mutation.CountryCodeCleared() {
+		_spec.ClearField(accesslog.FieldCountryCode, field.TypeString)
 	}
 	if aluo.mutation.OwnerUserCleared() {
 		edge := &sqlgraph.EdgeSpec{

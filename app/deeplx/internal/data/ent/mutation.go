@@ -304,9 +304,22 @@ func (m *AccessLogMutation) OldCountryName(ctx context.Context) (v string, err e
 	return oldValue.CountryName, nil
 }
 
+// ClearCountryName clears the value of the "country_name" field.
+func (m *AccessLogMutation) ClearCountryName() {
+	m.country_name = nil
+	m.clearedFields[accesslog.FieldCountryName] = struct{}{}
+}
+
+// CountryNameCleared returns if the "country_name" field was cleared in this mutation.
+func (m *AccessLogMutation) CountryNameCleared() bool {
+	_, ok := m.clearedFields[accesslog.FieldCountryName]
+	return ok
+}
+
 // ResetCountryName resets all changes to the "country_name" field.
 func (m *AccessLogMutation) ResetCountryName() {
 	m.country_name = nil
+	delete(m.clearedFields, accesslog.FieldCountryName)
 }
 
 // SetCountryCode sets the "country_code" field.
@@ -340,9 +353,22 @@ func (m *AccessLogMutation) OldCountryCode(ctx context.Context) (v string, err e
 	return oldValue.CountryCode, nil
 }
 
+// ClearCountryCode clears the value of the "country_code" field.
+func (m *AccessLogMutation) ClearCountryCode() {
+	m.country_code = nil
+	m.clearedFields[accesslog.FieldCountryCode] = struct{}{}
+}
+
+// CountryCodeCleared returns if the "country_code" field was cleared in this mutation.
+func (m *AccessLogMutation) CountryCodeCleared() bool {
+	_, ok := m.clearedFields[accesslog.FieldCountryCode]
+	return ok
+}
+
 // ResetCountryCode resets all changes to the "country_code" field.
 func (m *AccessLogMutation) ResetCountryCode() {
 	m.country_code = nil
+	delete(m.clearedFields, accesslog.FieldCountryCode)
 }
 
 // SetOwnerUserID sets the "owner_user" edge to the User entity by id.
@@ -552,6 +578,12 @@ func (m *AccessLogMutation) ClearedFields() []string {
 	if m.FieldCleared(accesslog.FieldUserID) {
 		fields = append(fields, accesslog.FieldUserID)
 	}
+	if m.FieldCleared(accesslog.FieldCountryName) {
+		fields = append(fields, accesslog.FieldCountryName)
+	}
+	if m.FieldCleared(accesslog.FieldCountryCode) {
+		fields = append(fields, accesslog.FieldCountryCode)
+	}
 	return fields
 }
 
@@ -568,6 +600,12 @@ func (m *AccessLogMutation) ClearField(name string) error {
 	switch name {
 	case accesslog.FieldUserID:
 		m.ClearUserID()
+		return nil
+	case accesslog.FieldCountryName:
+		m.ClearCountryName()
+		return nil
+	case accesslog.FieldCountryCode:
+		m.ClearCountryCode()
 		return nil
 	}
 	return fmt.Errorf("unknown AccessLog nullable field %s", name)

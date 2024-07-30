@@ -1,16 +1,18 @@
 module github.com/oio-network/deeplx-extend/app/deeplx
 
-go 1.22
+go 1.22.5
 
 replace github.com/oio-network/deeplx-extend => ../../
 
 require (
 	entgo.io/ent v0.13.1
 	github.com/go-kratos/kratos/v2 v2.8.0
+	github.com/go-sql-driver/mysql v1.8.1
 	github.com/google/uuid v1.6.0
 	github.com/google/wire v0.6.0
 	github.com/gorilla/handlers v1.5.2
 	github.com/klauspost/compress v1.17.9
+	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/oio-network/deeplx-extend v0.0.0-20240726072327-d94ab2a9ef01
 	github.com/oio-network/deeplx-extend/deeplx v0.0.0-20240726072327-d94ab2a9ef01
 	github.com/oschwald/geoip2-golang v1.11.0
@@ -25,6 +27,7 @@ require (
 require (
 	ariga.io/atlas v0.25.0 // indirect
 	dario.cat/mergo v1.0.0 // indirect
+	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/abadojack/whatlanggo v1.0.1 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/andybalholm/brotli v1.1.0 // indirect

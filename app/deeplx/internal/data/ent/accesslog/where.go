@@ -270,6 +270,16 @@ func CountryNameHasSuffix(v string) predicate.AccessLog {
 	return predicate.AccessLog(sql.FieldHasSuffix(FieldCountryName, v))
 }
 
+// CountryNameIsNil applies the IsNil predicate on the "country_name" field.
+func CountryNameIsNil() predicate.AccessLog {
+	return predicate.AccessLog(sql.FieldIsNull(FieldCountryName))
+}
+
+// CountryNameNotNil applies the NotNil predicate on the "country_name" field.
+func CountryNameNotNil() predicate.AccessLog {
+	return predicate.AccessLog(sql.FieldNotNull(FieldCountryName))
+}
+
 // CountryNameEqualFold applies the EqualFold predicate on the "country_name" field.
 func CountryNameEqualFold(v string) predicate.AccessLog {
 	return predicate.AccessLog(sql.FieldEqualFold(FieldCountryName, v))
@@ -333,6 +343,16 @@ func CountryCodeHasPrefix(v string) predicate.AccessLog {
 // CountryCodeHasSuffix applies the HasSuffix predicate on the "country_code" field.
 func CountryCodeHasSuffix(v string) predicate.AccessLog {
 	return predicate.AccessLog(sql.FieldHasSuffix(FieldCountryCode, v))
+}
+
+// CountryCodeIsNil applies the IsNil predicate on the "country_code" field.
+func CountryCodeIsNil() predicate.AccessLog {
+	return predicate.AccessLog(sql.FieldIsNull(FieldCountryCode))
+}
+
+// CountryCodeNotNil applies the NotNil predicate on the "country_code" field.
+func CountryCodeNotNil() predicate.AccessLog {
+	return predicate.AccessLog(sql.FieldNotNull(FieldCountryCode))
 }
 
 // CountryCodeEqualFold applies the EqualFold predicate on the "country_code" field.

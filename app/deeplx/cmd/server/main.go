@@ -97,7 +97,7 @@ func main() {
 		"caller", log.Caller(6),
 	)
 
-	app, cleanup, err := initApp(bc.Server, bc.Secret, db, logger, &fasthttp.Client{})
+	app, cleanup, err := initApp(bc.Server, bc.Data, bc.Secret, db, logger, &fasthttp.Client{})
 	if err != nil {
 		panic(err)
 	}

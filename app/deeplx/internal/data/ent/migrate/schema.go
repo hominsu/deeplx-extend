@@ -13,8 +13,8 @@ var (
 		{Name: "id", Type: field.TypeInt64, Increment: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "ip", Type: field.TypeString},
-		{Name: "country_name", Type: field.TypeString},
-		{Name: "country_code", Type: field.TypeString},
+		{Name: "country_name", Type: field.TypeString, Nullable: true},
+		{Name: "country_code", Type: field.TypeString, Nullable: true},
 		{Name: "user_id", Type: field.TypeInt64, Nullable: true},
 	}
 	// AccessLogsTable holds the schema information for the "access_logs" table.

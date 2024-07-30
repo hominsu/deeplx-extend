@@ -9,7 +9,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/http"
 )
 
-const ContextKeyRemoteAddr ContextKey = "remote-addr"
+const ContextKeyRemoteAddr ContextKey = "x-md-global-remote-addr"
 
 func Info() middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {

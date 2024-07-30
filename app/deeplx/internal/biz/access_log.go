@@ -45,7 +45,17 @@ func NewAccessLogUsecase(repo AccessLogRepo, logger log.Logger) *AccessLogUseCas
 }
 
 func (uc *AccessLogUseCase) Create(ctx context.Context, log *v1.AccessLog) (*v1.AccessLog, error) {
-	
+	l, err := ToAccessLog(log)
+	if err != nil {
+		return nil, err
+	}
+
+	ret, err := uc.repo.Create(ctx, l)
+	if err != nil {
+		return nil, err
+	}
+
+	return ToProtoAccessLog(ret)
 }
 
 func ToAccessLog(p *v1.AccessLog) (*AccessLog, error) {
@@ -69,11 +79,11 @@ func ToAccessLog(p *v1.AccessLog) (*AccessLog, error) {
 func ToAccessLogList(p []*v1.AccessLog) ([]*AccessLog, error) {
 	alList := make([]*AccessLog, 0, len(p))
 	for _, pbEntity := range p {
-		log, err := ToAccessLog(pbEntity)
+		al, err := ToAccessLog(pbEntity)
 		if err != nil {
 			return nil, err
 		}
-		alList = append(alList, log)
+		alList = append(alList, al)
 	}
 	return alList, nil
 }

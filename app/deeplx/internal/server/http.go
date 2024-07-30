@@ -25,6 +25,7 @@ func NewHTTPServer(
 			recovery.Recovery(),
 			logging.Server(logger),
 			validate.Validator(),
+			middleware.Info(),
 			middleware.Auth(),
 		),
 		http.Filter(

@@ -4,8 +4,8 @@ server:
     timeout: 60s
 data:
   database:
-    driver: sqlite3
-    source: file:ent?mode=memory&cache=shared&_fk=1
+    driver: mysql
+    source: root:dangerous@tcp(127.0.0.1:3306)/deeplx?charset=utf8mb4&parseTime=True&loc=Local
   redis:
     addr: 127.0.0.1:6379
     password:

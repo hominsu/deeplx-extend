@@ -17,8 +17,8 @@ func (AccessLog) Fields() []ent.Field {
 		field.Int64("id"),
 		field.Int64("user_id").Optional(),
 		field.String("ip"),
-		field.String("country_name"),
-		field.String("country_code"),
+		field.String("country_name").Optional(),
+		field.String("country_code").Optional(),
 	}
 }
 

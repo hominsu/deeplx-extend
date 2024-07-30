@@ -16,6 +16,10 @@ import (
 	"github.com/oio-network/deeplx-extend/app/deeplx/internal/conf"
 	"github.com/oio-network/deeplx-extend/app/deeplx/internal/data/ent"
 	"github.com/oio-network/deeplx-extend/app/deeplx/internal/data/ent/migrate"
+
+	// driver
+	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var ProviderSet = wire.NewSet(
@@ -118,7 +122,7 @@ func NewCacheAsideClient(conf *conf.Data, logger log.Logger) (rueidisaside.Cache
 			InitAddress:  []string{conf.Redis.Addr},
 			Password:     conf.Redis.Password,
 			SelectDB:     int(conf.Redis.Db),
-			DisableCache: conf.Cache.ClientCache,
+			DisableCache: conf.Cache.DisableClientCache,
 		},
 	})
 	if err != nil {
