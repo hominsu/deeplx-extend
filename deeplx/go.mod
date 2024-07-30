@@ -5,8 +5,8 @@ go 1.22
 require (
 	github.com/abadojack/whatlanggo v1.0.1
 	github.com/go-kratos/kratos/v2 v2.8.0
-	github.com/oio-network/deeplx-extend v0.0.0-20240726072327-d94ab2a9ef01
-	github.com/tidwall/gjson v1.17.1
+	github.com/oio-network/deeplx-extend v0.0.0-20240730032926-7ab9dbe9a923
+	github.com/tidwall/gjson v1.17.2
 	github.com/valyala/fasthttp v1.55.0
 )
 
