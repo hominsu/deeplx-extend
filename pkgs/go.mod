@@ -4,7 +4,7 @@ go 1.22
 
 require (
 	github.com/RichardKnop/logging v0.0.0-20190827224416-1a693bdd4fae
-	github.com/RichardKnop/machinery/v2 v2.0.13
+	github.com/RichardKnop/machinery/v2 v2.0.14-0.20240522233733-5dad7c262143
 	github.com/go-kratos/kratos/v2 v2.8.0
 	go.opentelemetry.io/otel v1.28.0
 	google.golang.org/grpc v1.65.0

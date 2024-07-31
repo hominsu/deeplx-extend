@@ -55,8 +55,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/RichardKnop/logging v0.0.0-20190827224416-1a693bdd4fae h1:DcFpTQBYQ9Ct2d6sC7ol0/ynxc2pO1cpGUM+f4t5adg=
 github.com/RichardKnop/logging v0.0.0-20190827224416-1a693bdd4fae/go.mod h1:rJJ84PyA/Wlmw1hO+xTzV2wsSUon6J5ktg0g8BF2PuU=
-github.com/RichardKnop/machinery/v2 v2.0.13 h1:uo9htg+qNBi7UeUK3jcTBl3vTO/vvLKGaOdCOKePl50=
-github.com/RichardKnop/machinery/v2 v2.0.13/go.mod h1:Yc2X/QRm9rRfAjB+93NGR+kSUqtnqqs8kME4L+TKKiw=
+github.com/RichardKnop/machinery/v2 v2.0.14-0.20240522233733-5dad7c262143 h1:0PEgAHPKuROt62YnjHL4k5Y/w3mV9JFXcAuVCnXYJTQ=
+github.com/RichardKnop/machinery/v2 v2.0.14-0.20240522233733-5dad7c262143/go.mod h1:Yc2X/QRm9rRfAjB+93NGR+kSUqtnqqs8kME4L+TKKiw=
 github.com/aws/aws-sdk-go v1.34.28/go.mod h1:H7NKnBqNVzoTJpGfLrQkkD+ytBA93eiDYi/+8rV9s48=
 github.com/aws/aws-sdk-go v1.37.16/go.mod h1:hcU610XS61/+aQV88ixoOzUoG7v3b31pl2zKMmprdro=
 github.com/aws/aws-sdk-go v1.55.5 h1:KKUZBfBoyqy5d3swXyiC7Q76ic40rYcbqH7qjh59kzU=
