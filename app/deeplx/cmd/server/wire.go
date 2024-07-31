@@ -17,6 +17,7 @@ import (
 	"github.com/oio-network/deeplx-extend/app/deeplx/internal/data"
 	"github.com/oio-network/deeplx-extend/app/deeplx/internal/server"
 	"github.com/oio-network/deeplx-extend/app/deeplx/internal/service"
+	"github.com/oio-network/deeplx-extend/app/deeplx/internal/task"
 )
 
 // initApp init kratos application.
@@ -33,6 +34,7 @@ func initApp(
 			data.ProviderSet,
 			biz.ProviderSet,
 			service.ProviderSet,
+			task.ProviderSet,
 			server.ProviderSet,
 			newApp,
 		),

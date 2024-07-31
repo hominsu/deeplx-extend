@@ -3,11 +3,10 @@ package service
 import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"
-	"github.com/oschwald/geoip2-golang"
 
 	v1 "github.com/oio-network/deeplx-extend/api/deeplx/v1"
-	"github.com/oio-network/deeplx-extend/app/deeplx/internal/biz"
 	"github.com/oio-network/deeplx-extend/app/deeplx/internal/conf"
+	"github.com/oio-network/deeplx-extend/app/deeplx/internal/task"
 	"github.com/oio-network/deeplx-extend/app/deeplx/pkgs/client_pool"
 	"github.com/oio-network/deeplx-extend/deeplx"
 )
@@ -22,28 +21,27 @@ var ProviderSet = wire.NewSet(
 type DeepLXService struct {
 	v1.UnimplementedDeepLXServiceServer
 
-	au   *biz.AccessLogUseCase
-	ts   *deeplx.TranslateService
+	lt *task.LogTask
+	ts *deeplx.TranslateService
+
 	cs   *conf.Secret
 	pool *client_pool.ClientPool
-	mmdb *geoip2.Reader
-	log  *log.Helper
+
+	log *log.Helper
 }
 
 func NewDeepLXService(
-	au *biz.AccessLogUseCase,
+	lt *task.LogTask,
 	ts *deeplx.TranslateService,
 	cs *conf.Secret,
 	pool *client_pool.ClientPool,
-	mmdb *geoip2.Reader,
 	logger log.Logger,
 ) *DeepLXService {
 	return &DeepLXService{
-		au:   au,
+		lt:   lt,
 		ts:   ts,
 		cs:   cs,
 		pool: pool,
-		mmdb: mmdb,
 		log:  log.NewHelper(log.With(logger, "module", "service/deeplx")),
 	}
 }

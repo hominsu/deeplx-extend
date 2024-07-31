@@ -14,6 +14,7 @@ import (
 	"github.com/oio-network/deeplx-extend/app/deeplx/internal/data"
 	"github.com/oio-network/deeplx-extend/app/deeplx/internal/server"
 	"github.com/oio-network/deeplx-extend/app/deeplx/internal/service"
+	"github.com/oio-network/deeplx-extend/app/deeplx/internal/task"
 	"github.com/oio-network/deeplx-extend/app/deeplx/pkgs/client_pool"
 	"github.com/oio-network/deeplx-extend/deeplx"
 	"github.com/oschwald/geoip2-golang"
@@ -35,11 +36,13 @@ func initApp(confServer *conf.Server, confData *conf.Data, confSecret *conf.Secr
 	}
 	accessLogRepo := data.NewAccessLogRepo(dataData, logger)
 	accessLogUseCase := biz.NewAccessLogUsecase(accessLogRepo, logger)
+	logTask := task.NewLogTask(accessLogUseCase, db, logger)
+	machineryServer := server.NewMachineryServer(confData, logTask)
 	translateService := deeplx.NewTranslateService(logger)
 	clientPool, cleanup3 := client_pool.NewClientPool(clients...)
-	deepLXService := service.NewDeepLXService(accessLogUseCase, translateService, confSecret, clientPool, db, logger)
+	deepLXService := service.NewDeepLXService(logTask, translateService, confSecret, clientPool, logger)
 	httpServer := server.NewHTTPServer(confServer, deepLXService, logger)
-	app := newApp(logger, httpServer)
+	app := newApp(logger, machineryServer, httpServer)
 	return app, func() {
 		cleanup3()
 		cleanup2()

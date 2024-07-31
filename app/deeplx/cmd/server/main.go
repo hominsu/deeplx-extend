@@ -16,6 +16,7 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/oio-network/deeplx-extend/app/deeplx/internal/conf"
+	"github.com/oio-network/deeplx-extend/app/deeplx/internal/server"
 )
 
 // go build -ldflags "-X main.Version=x.y.z"
@@ -44,13 +45,14 @@ func init() {
 	}
 }
 
-func newApp(logger log.Logger, hs *http.Server) *kratos.App {
+func newApp(logger log.Logger, ms server.MachineryServer, hs *http.Server) *kratos.App {
 	return kratos.New(
 		kratos.Name(Name),
 		kratos.Version(Version),
 		kratos.Metadata(map[string]string{}),
 		kratos.Logger(logger),
 		kratos.Server(
+			ms,
 			hs,
 		),
 	)
