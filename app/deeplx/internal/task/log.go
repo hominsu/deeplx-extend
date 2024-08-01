@@ -7,7 +7,17 @@ import (
 	v1 "github.com/oio-network/deeplx-extend/api/deeplx/v1"
 )
 
-func (t *LogTask) CreateAccessLog(remoteAddr string) error {
+const LogTaskCreateAccessLog = "logTask.CreateAccessLog"
+
+func (t *logTask) RegisterLogTask(srv MachineryServer) error {
+	if err := srv.HandleFunc(LogTaskCreateAccessLog, t.CreateAccessLog); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (t *logTask) CreateAccessLog(remoteAddr string) error {
 	ip, _, _ := net.SplitHostPort(remoteAddr)
 
 	log := &v1.AccessLog{

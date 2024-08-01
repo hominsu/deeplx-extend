@@ -21,7 +21,7 @@ var ProviderSet = wire.NewSet(
 type DeepLXService struct {
 	v1.UnimplementedDeepLXServiceServer
 
-	lt *task.LogTask
+	ms task.MachineryServer
 	ts *deeplx.TranslateService
 
 	cs   *conf.Secret
@@ -31,14 +31,14 @@ type DeepLXService struct {
 }
 
 func NewDeepLXService(
-	lt *task.LogTask,
+	ms task.MachineryServer,
 	ts *deeplx.TranslateService,
 	cs *conf.Secret,
 	pool *client_pool.ClientPool,
 	logger log.Logger,
 ) *DeepLXService {
 	return &DeepLXService{
-		lt:   lt,
+		ms:   ms,
 		ts:   ts,
 		cs:   cs,
 		pool: pool,

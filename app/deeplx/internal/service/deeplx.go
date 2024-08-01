@@ -6,7 +6,9 @@ import (
 	"github.com/go-kratos/kratos/v2/metadata"
 
 	v1 "github.com/oio-network/deeplx-extend/api/deeplx/v1"
+	"github.com/oio-network/deeplx-extend/app/deeplx/internal/task"
 	"github.com/oio-network/deeplx-extend/app/deeplx/pkgs/middleware"
+	"github.com/oio-network/deeplx-extend/pkgs/machinery"
 )
 
 func (s *DeepLXService) Translate(ctx context.Context, req *v1.TranslateRequest) (*v1.TranslationResult, error) {
@@ -37,7 +39,7 @@ func (s *DeepLXService) Translate(ctx context.Context, req *v1.TranslateRequest)
 		remoteAddr = md.Get(string(middleware.ContextKeyRemoteAddr))
 	}
 
-	if err := s.lt.CreateAccessLog(remoteAddr); err != nil {
+	if err := s.ms.NewTask(task.LogTaskCreateAccessLog, machinery.WithArgument("string", remoteAddr)); err != nil {
 		return nil, v1.ErrorInternal("create access log failed")
 	}
 

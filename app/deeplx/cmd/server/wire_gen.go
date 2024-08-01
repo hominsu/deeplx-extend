@@ -37,10 +37,10 @@ func initApp(confServer *conf.Server, confData *conf.Data, confSecret *conf.Secr
 	accessLogRepo := data.NewAccessLogRepo(dataData, logger)
 	accessLogUseCase := biz.NewAccessLogUsecase(accessLogRepo, logger)
 	logTask := task.NewLogTask(accessLogUseCase, db, logger)
-	machineryServer := server.NewMachineryServer(confData, logTask)
+	machineryServer := task.NewMachineryServer(confData, logTask)
 	translateService := deeplx.NewTranslateService(logger)
 	clientPool, cleanup3 := client_pool.NewClientPool(clients...)
-	deepLXService := service.NewDeepLXService(logTask, translateService, confSecret, clientPool, logger)
+	deepLXService := service.NewDeepLXService(machineryServer, translateService, confSecret, clientPool, logger)
 	httpServer := server.NewHTTPServer(confServer, deepLXService, logger)
 	app := newApp(logger, machineryServer, httpServer)
 	return app, func() {
