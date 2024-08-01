@@ -5,9 +5,14 @@ import (
 	"net"
 
 	v1 "github.com/oio-network/deeplx-extend/api/deeplx/v1"
+	"github.com/oio-network/deeplx-extend/app/deeplx/pkgs/msg"
 )
 
 const LogTaskCreateAccessLog = "logTask.CreateAccessLog"
+
+type AccessLogParams struct {
+	RemoteAddr string
+}
 
 func (t *logTask) RegisterLogTask(srv MachineryServer) error {
 	if err := srv.HandleFunc(LogTaskCreateAccessLog, t.CreateAccessLog); err != nil {
@@ -17,14 +22,16 @@ func (t *logTask) RegisterLogTask(srv MachineryServer) error {
 	return nil
 }
 
-func (t *logTask) CreateAccessLog(remoteAddr string) error {
-	ip, _, _ := net.SplitHostPort(remoteAddr)
-
-	log := &v1.AccessLog{
-		Ip: ip,
+func (t *logTask) CreateAccessLog(b []byte) error {
+	params := &AccessLogParams{}
+	if err := msg.Unmarshal(b, params); err != nil {
+		t.log.Error(err)
+		return err
 	}
 
-	record, err := t.mmdb.Country(net.ParseIP(remoteAddr))
+	log := &v1.AccessLog{}
+	log.Ip, _, _ = net.SplitHostPort(params.RemoteAddr)
+	record, err := t.mmdb.Country(net.ParseIP(log.Ip))
 	if err == nil {
 		log.CountryName = record.Country.Names["en"]
 		log.CountryCode = record.Country.IsoCode

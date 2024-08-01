@@ -8,6 +8,7 @@ import (
 	v1 "github.com/oio-network/deeplx-extend/api/deeplx/v1"
 	"github.com/oio-network/deeplx-extend/app/deeplx/internal/task"
 	"github.com/oio-network/deeplx-extend/app/deeplx/pkgs/middleware"
+	"github.com/oio-network/deeplx-extend/app/deeplx/pkgs/msg"
 	"github.com/oio-network/deeplx-extend/pkgs/machinery"
 )
 
@@ -39,8 +40,18 @@ func (s *DeepLXService) Translate(ctx context.Context, req *v1.TranslateRequest)
 		remoteAddr = md.Get(string(middleware.ContextKeyRemoteAddr))
 	}
 
-	if err := s.ms.NewTask(task.LogTaskCreateAccessLog, machinery.WithArgument("string", remoteAddr)); err != nil {
-		return nil, v1.ErrorInternal("create access log failed")
+	if remoteAddr != "" {
+		bytes, err := msg.Marshal(&task.AccessLogParams{
+			RemoteAddr: remoteAddr,
+		})
+		if err != nil {
+			s.log.Error(err)
+		}
+
+		err = s.ms.NewTask(task.LogTaskCreateAccessLog, machinery.WithArgument("[]byte", bytes))
+		if err != nil {
+			s.log.Error(err)
+		}
 	}
 
 	payload := req.GetPayload()

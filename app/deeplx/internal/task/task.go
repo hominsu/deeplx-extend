@@ -57,6 +57,12 @@ type logTask struct {
 	log  *log.Helper
 }
 
+type LogTask interface {
+	RegisterLogTask(srv MachineryServer) error
+
+	CreateAccessLog(b []byte) error
+}
+
 func NewLogTask(
 	au *biz.AccessLogUseCase,
 	mmdb *geoip2.Reader,
@@ -67,10 +73,4 @@ func NewLogTask(
 		mmdb: mmdb,
 		log:  log.NewHelper(log.With(logger, "module", "task/log")),
 	}
-}
-
-type LogTask interface {
-	RegisterLogTask(srv MachineryServer) error
-
-	CreateAccessLog(remoteAddr string) error
 }
