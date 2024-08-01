@@ -247,6 +247,7 @@ func (r *accessLogRepo) createBuilder(log *biz.AccessLog) *ent.AccessLogCreate {
 	m.SetIP(log.IP)
 	m.SetCountryName(log.CountryName)
 	m.SetCountryCode(log.CountryCode)
+	m.SetCreatedAt(log.CreatedAt)
 	if log.OwnerUser != nil {
 		m.SetOwnerUserID(log.OwnerUser.ID)
 	}

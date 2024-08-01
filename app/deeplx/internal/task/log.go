@@ -4,6 +4,8 @@ import (
 	"context"
 	"net"
 
+	"google.golang.org/protobuf/types/known/timestamppb"
+
 	v1 "github.com/oio-network/deeplx-extend/api/deeplx/v1"
 	"github.com/oio-network/deeplx-extend/app/deeplx/pkgs/msg"
 )
@@ -12,6 +14,7 @@ const LogTaskCreateAccessLog = "logTask.CreateAccessLog"
 
 type AccessLogParams struct {
 	RemoteAddr string
+	CreatedAt  *timestamppb.Timestamp
 }
 
 func (t *logTask) RegisterLogTask(srv MachineryServer) error {
@@ -29,7 +32,7 @@ func (t *logTask) CreateAccessLog(b []byte) error {
 		return err
 	}
 
-	log := &v1.AccessLog{}
+	log := &v1.AccessLog{CreatedAt: params.CreatedAt}
 	log.Ip, _, _ = net.SplitHostPort(params.RemoteAddr)
 	record, err := t.mmdb.Country(net.ParseIP(log.Ip))
 	if err == nil {

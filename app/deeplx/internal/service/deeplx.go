@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-kratos/kratos/v2/metadata"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	v1 "github.com/oio-network/deeplx-extend/api/deeplx/v1"
 	"github.com/oio-network/deeplx-extend/app/deeplx/internal/task"
@@ -43,6 +44,7 @@ func (s *DeepLXService) Translate(ctx context.Context, req *v1.TranslateRequest)
 	if remoteAddr != "" {
 		bytes, err := msg.Marshal(&task.AccessLogParams{
 			RemoteAddr: remoteAddr,
+			CreatedAt:  timestamppb.Now(),
 		})
 		if err != nil {
 			s.log.Error(err)
