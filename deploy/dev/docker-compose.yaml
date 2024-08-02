@@ -1,28 +1,31 @@
 services:
   mysql:
-    image: mysql:latest
+    image: bitnami/mysql:latest
     container_name: mysql
-    restart: always
-    volumes:
-      - ./mysql/mysql:/var/lib/mysql
-      - ./mysql/conf/my.cnf:/etc/my.cnf
-      - ./mysql/init:/docker-entrypoint-initdb.d
     environment:
-      - "MYSQL_ROOT_PASSWORD=dangerous"
+      MYSQL_ROOT_PASSWORD: "dangerous"
+      MYSQL_DATABASE: "deeplx"
+    volumes:
+      - "./mysql/data:/bitnami/mysql/data"
     ports:
       - "3306:3306"
+    healthcheck:
+      test: [ 'CMD', '/opt/bitnami/scripts/mysql/healthcheck.sh' ]
+      interval: 15s
+      timeout: 5s
+      retries: 6
     networks:
       net:
         aliases:
           - mysql
 
   redis:
-    image: redis:latest
+    image: bitnami/redis:latest
     container_name: redis
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
     volumes:
-      #      - ./redis/conf/redis.conf:/usr/local/etc/redis/redis.conf
-      - ./redis/data:/data
-      - ./redis/logs:/logs
+      - "./redis/data:/bitnami/redis/data"
     ports:
       - "6379:6379"
     networks:

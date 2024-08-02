@@ -21,6 +21,5 @@ app/**/bin
 app/**/data
 !app/**/internal/data
 
-/deploy/dev/mysql/mysql
+/deploy/dev/mysql/data
 /deploy/dev/redis/data
-/deploy/dev/redis/logs
