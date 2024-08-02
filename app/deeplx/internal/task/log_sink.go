@@ -94,7 +94,9 @@ func (s *LogSink) loop(stop <-chan struct{}) {
 				}
 				batch = nil
 			}
-			commit.Stop()
+			if commit != nil {
+				commit.Stop()
+			}
 		}
 	}
 }
