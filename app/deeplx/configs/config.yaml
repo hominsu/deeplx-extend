@@ -13,6 +13,10 @@ data:
   cache:
     disable_client_cache: false
     ttl: 600s
+  log:
+    batch_write_size: 512
+    batch_write_interval: 5s
+    batch_write_timeout: 3s
 secret:
   auth:
     token: homingso

@@ -30,6 +30,7 @@ type AccessLogRepo interface {
 	Get(ctx context.Context, logId int64, view v1.View) (*AccessLog, error)
 	List(ctx context.Context, pageSize int, pageToken string, view v1.View) (*AccessLogPage, error)
 	CountIP(ctx context.Context, ip string) (int64, error)
+	BatchCreate(ctx context.Context, logs []*AccessLog) ([]*AccessLog, error)
 }
 
 type AccessLogUseCase struct {
@@ -56,6 +57,20 @@ func (uc *AccessLogUseCase) Create(ctx context.Context, log *v1.AccessLog) (*v1.
 	}
 
 	return ToProtoAccessLog(ret)
+}
+
+func (uc *AccessLogUseCase) BatchCreate(ctx context.Context, logs []*v1.AccessLog) ([]*v1.AccessLog, error) {
+	l, err := ToAccessLogList(logs)
+	if err != nil {
+		return nil, err
+	}
+
+	ret, err := uc.repo.BatchCreate(ctx, l)
+	if err != nil {
+		return nil, err
+	}
+
+	return ToProtoAccessLogList(ret)
 }
 
 func ToAccessLog(p *v1.AccessLog) (*AccessLog, error) {

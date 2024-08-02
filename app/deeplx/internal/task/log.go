@@ -1,7 +1,6 @@
 package task
 
 import (
-	"context"
 	"net"
 
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -34,14 +33,16 @@ func (t *logTask) CreateAccessLog(b []byte) error {
 
 	log := &v1.AccessLog{CreatedAt: params.CreatedAt}
 	log.Ip, _, _ = net.SplitHostPort(params.RemoteAddr)
+
 	record, err := t.mmdb.Country(net.ParseIP(log.Ip))
 	if err == nil {
 		log.CountryName = record.Country.Names["en"]
 		log.CountryCode = record.Country.IsoCode
 	}
 
-	if _, err = t.au.Create(context.TODO(), log); err != nil {
-		return v1.ErrorInternal("write access log failed")
+	if err = t.sink.Append(log); err != nil {
+		t.log.Error(err)
+		return err
 	}
 
 	return nil

@@ -35,9 +35,15 @@ message Data {
     bool disable_client_cache = 1;
     google.protobuf.Duration ttl = 2;
   }
+  message Log {
+    uint32 batch_write_size = 1;
+    google.protobuf.Duration batch_write_interval = 2;
+    google.protobuf.Duration batch_write_timeout = 3;
+  }
   Database database = 1;
   Redis redis = 2;
   Cache cache = 3;
+  Log log = 4;
 }
 
 message Secret {

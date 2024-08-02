@@ -7,13 +7,13 @@ import (
 	"github.com/google/wire"
 	"github.com/oschwald/geoip2-golang"
 
-	"github.com/oio-network/deeplx-extend/app/deeplx/internal/biz"
 	"github.com/oio-network/deeplx-extend/app/deeplx/internal/conf"
 	"github.com/oio-network/deeplx-extend/pkgs/machinery"
 )
 
 var ProviderSet = wire.NewSet(
 	NewLogTask,
+	NewLogSink,
 	NewMachineryServer,
 )
 
@@ -52,9 +52,10 @@ func NewMachineryServer(
 }
 
 type logTask struct {
-	au   *biz.AccessLogUseCase
 	mmdb *geoip2.Reader
-	log  *log.Helper
+	sink *LogSink
+
+	log *log.Helper
 }
 
 type LogTask interface {
@@ -64,13 +65,13 @@ type LogTask interface {
 }
 
 func NewLogTask(
-	au *biz.AccessLogUseCase,
 	mmdb *geoip2.Reader,
+	sink *LogSink,
 	logger log.Logger,
 ) LogTask {
 	return &logTask{
-		au:   au,
 		mmdb: mmdb,
+		sink: sink,
 		log:  log.NewHelper(log.With(logger, "module", "task/log")),
 	}
 }

@@ -242,6 +242,32 @@ func (r *accessLogRepo) CountIP(ctx context.Context, ip string) (int64, error) {
 	}
 }
 
+func (r *accessLogRepo) BatchCreate(ctx context.Context, logs []*biz.AccessLog) ([]*biz.AccessLog, error) {
+	if len(logs) > biz.MaxBatchCreateSize {
+		return nil, v1.ErrorInvalidArgument("batch size cannot be greater than %d", biz.MaxBatchCreateSize)
+	}
+
+	bulk := make([]*ent.AccessLogCreate, 0, len(logs))
+	for _, l := range logs {
+		bulk = append(bulk, r.createBuilder(l))
+	}
+	res, err := r.data.db.AccessLog.CreateBulk(bulk...).Save(ctx)
+	switch {
+	case err == nil:
+		al, tErr := toAccessLogList(res)
+		if tErr != nil {
+			return nil, v1.ErrorInternal("internal error: %v", tErr)
+		}
+		return al, nil
+	case sqlgraph.IsUniqueConstraintError(err):
+		return nil, v1.ErrorAlreadyExists("access log already exists: %v", err)
+	case ent.IsConstraintError(err):
+		return nil, v1.ErrorInvalidArgument("invalid argument: %v", err)
+	default:
+		return nil, v1.ErrorUnknown("unknown error: %v", err)
+	}
+}
+
 func (r *accessLogRepo) createBuilder(log *biz.AccessLog) *ent.AccessLogCreate {
 	m := r.data.db.AccessLog.Create()
 	m.SetIP(log.IP)
