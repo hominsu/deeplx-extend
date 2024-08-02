@@ -11,7 +11,6 @@ import (
 	"os"
 
 	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/health"
@@ -52,8 +51,6 @@ func (s *KeepAliveService) Start() error {
 
 	s.health.Resume()
 
-	log.Debugf("keep alive service started at %s", s.lis.Addr().String())
-
 	err := s.Serve(s.lis)
 	if !errors.Is(err, http.ErrServerClosed) {
 		return err
@@ -62,11 +59,9 @@ func (s *KeepAliveService) Start() error {
 	return nil
 }
 
-func (s *KeepAliveService) Stop(ctx context.Context) error {
+func (s *KeepAliveService) Stop(_ context.Context) error {
 	s.health.Shutdown()
 	s.GracefulStop()
-
-	log.Debug("keep alive service stopping")
 
 	return nil
 }
